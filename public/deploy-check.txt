@@ -1,0 +1,3 @@
+BandMate deploy check
+repo: TifexLab/BandMate
+marker: 2026-11-04-1
