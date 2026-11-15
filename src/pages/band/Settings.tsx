@@ -8,6 +8,7 @@ import { useSettings } from "../../state/settings";
 import { useBand } from "../../state/band";
 import { useTenant } from "../../state/tenant";
 import { ExtendButton, UsageCard } from "../../components/plans";
+import Help from "../../components/Help";
 import { roleLabel, useAuth } from "../../state/auth";
 import { useToast } from "../../state/toast";
 import { errorText } from "../../lib/format";
@@ -26,6 +27,7 @@ export default function SettingsPage() {
   return (
     <div className="flow">
       <PlanSection />
+      <Help />
       <BandSection />
       <LookSection />
       <TopBarSection />

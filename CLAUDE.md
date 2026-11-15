@@ -142,6 +142,12 @@ Accounts made by the scripts are marked verified. Unverified Auth accounts stay 
 - Fans see `QrPopup` (a `Sheet` in the app's style, QR on an always-white tile, "Pay now" button + the link's host when `payUrl` is set).
   The staff-only full-screen view (`QrFull`, wake lock) remains only in the Sell sheet's explicit "full screen" action.
 
+## Help (in-app manual)
+`src/components/Help.tsx`, shown in Settings under the plan card: expandable topics (one open at a time, `.acc*` styles in `styles.css`).
+Texts are `help.<id>.title/.lead/.b1…bN` in both `en.ts` and `sk.ts`. To add or change a topic edit `TOPICS` in the component (bullet count)
+and write the keys in both languages. Keep the manual in step with the app: when a feature changes, update its topic. Don't use `|` in
+help text (it means "plural forms" in the i18n files).
+
 ## Languages (English + Slovak)
 - Every visible phrase lives in `src/i18n/en.ts` and `src/i18n/sk.ts` (same keys; `sk` is typed against `en`, so a missing
   key fails `tsc`). Pages use `const t = useT(); t("key", { name })`; code outside React (helpers, thrown errors) uses
