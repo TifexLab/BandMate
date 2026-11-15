@@ -9,6 +9,11 @@ import { useT } from "../i18n";
 import type { Photo } from "../types";
 
 export const Icon = {
+  undo: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M9 14L4 9l5-5M4 9h10a6 6 0 0 1 0 12h-3" />
+    </svg>
+  ),
   x: (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
       <path d="M6 6l12 12M18 6L6 18" />
@@ -126,7 +131,7 @@ export function PaySection({ idPrefix, qrUrl, onQr, payUrl, onPayUrl, cardPay, o
         }}
       />
       <PayLinkField id={`${idPrefix}Pay`} value={payUrl} onChange={onPayUrl} />
-      <Toggle id={`${idPrefix}Card`} checked={cardPay} onChange={onCardPay} label={t("pay.card")} hint={t("pay.cardHint")} />
+      <Toggle id={`${idPrefix}Card`} checked={cardPay} onChange={onCardPay} label={t("pay.stripe")} hint={t("pay.cardHint")} />
       <p className={methods.length ? "paysum" : "paysum none"}>{methods.length ? t("pay.summary", { list: methods.join(", ") }) : t("pay.none")}</p>
     </fieldset>
   );

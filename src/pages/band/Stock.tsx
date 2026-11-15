@@ -5,7 +5,7 @@ import { useSettings } from "../../state/settings";
 import { useAuth } from "../../state/auth";
 import { useToast } from "../../state/toast";
 import { errorText, groupItems, itemLabel, money } from "../../lib/format";
-import { addStock, createItems, deleteItem, recordSale, setStockCount, updateItem } from "../../lib/ops";
+import { addStock, createItems, deleteItem, recordSale, setSaleUndone, setStockCount, updateItem } from "../../lib/ops";
 import { removeImage } from "../../lib/images";
 import { useT } from "../../i18n";
 import { ConfirmButton, Icon, PaySection, PhotosField, QrPopup, Sheet, Toggle } from "../../components/ui";
@@ -16,7 +16,7 @@ const pill = (n: number) => (n < 0 ? "out" : n === 0 ? "out" : n <= 3 ? "low" : 
 
 export default function Stock() {
   const t = useT();
-  const { items, stock, band, limits, usage } = useBand();
+  const { items, stock, band, limits, usage, sales } = useBand();
   const { settings } = useSettings();
   const { profile } = useAuth();
   const atLimit = usage.items >= limits.items;
@@ -39,6 +39,18 @@ export default function Stock() {
     });
     saved.catch((e) => toast(t("sell.saleNotSaved", { err: errorText(e) })));
     toast(t("stock.soldOne", { label: itemLabel(it) }));
+  };
+
+  // Takes one piece back: cancels the newest sale of this item that is still standing, which puts that piece back in stock.
+  // Works any time, however long ago it was sold. A piece sold inside a bigger sale has to be cancelled in Sales instead.
+  const lastSale = (it: Item) => sales.find((s) => !s.undone && s.lines.some((l) => l.picks.some((p) => p.itemId === it.id)));
+  const returnOne = (it: Item) => {
+    const s = lastSale(it);
+    if (!s) return toast(t("stock.returnNone"));
+    const simple = s.lines.length === 1 && s.lines[0].qty === 1 && s.lines[0].picks.length === 1 && s.lines[0].picks[0].itemId === it.id && s.lines[0].picks[0].qty === 1;
+    if (!simple) return toast(t("stock.returnLarger", { label: itemLabel(it) }));
+    setSaleUndone(s, true, stock, items).catch((e) => toast(errorText(e)));
+    toast(t("stock.returned", { label: itemLabel(it) }));
   };
 
   return (
@@ -82,6 +94,7 @@ export default function Stock() {
                   </span>
                   <div className="row-act">
                     <button className="sold-btn" disabled={n <= 0} onClick={() => soldOne(it)}>{t("stock.sold1")}</button>
+                    <button className="icon-btn" disabled={!lastSale(it)} onClick={() => returnOne(it)} aria-label={t("stock.returnAria", { label: itemLabel(it) })} title={t("stock.returnTitle")}>{Icon.undo}</button>
                     <button className="add-btn" onClick={() => setRestock(it)} aria-label={t("stock.addPiecesAria", { label: itemLabel(it) })}>{t("stock.plusPcs")}</button>
                     <button className="icon-btn" onClick={() => setEdit(it)} aria-label={t("stock.editAria", { label: itemLabel(it) })}>{Icon.edit}</button>
                   </div>

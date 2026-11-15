@@ -119,7 +119,7 @@ export const en = {
   "tab.aria": "Sections",
   "pay.qr": "QR",
   "pay.cash": "Cash",
-  "pay.card": "Card payment (Stripe)",
+  "pay.card": "Card",
   "pay.quick": "Quick",
   "gig.set": "Set tonight's gig",
   "gig.title": "Tonight's gig",
@@ -529,7 +529,7 @@ export const en = {
   "help.stock.lead": "Stock is the list of everything you sell, with photos, price, a payment QR and how many pieces you have.",
   "help.stock.b1": "Tap Add item. Use the same name for every size so they group together, and type sizes separated by commas (S, M, L) to create them all at once.",
   "help.stock.b2": "Add up to 6 photos per product. The first one is the main photo. All sizes of one product share the same photos.",
-  "help.stock.b3": "Use the + button on a row to add pieces, or type the exact number to correct the count. The Sold 1 button sells a piece quickly.",
+  "help.stock.b3": "Use the + button on a row to add pieces, or type the exact number to correct the count. Sold 1 sells one piece. The back arrow next to it puts the last sold piece back in stock, any time.",
   "help.stock.b4": "Switch off the fan-page option to hide an item. Hidden items stay in stock and can still be sold at the table.",
   "help.stock.b5": "A red “over” number means more pieces were sold than were counted. Correct the count to fix it.",
   "help.qr.title": "Payment QR and link",
@@ -595,6 +595,12 @@ export const en = {
   "pay.qrName": "QR code",
   "pay.linkName": "bank link",
   "pay.cardName": "card",
+  "pay.stripe": "Card payment (Stripe)",
+  "stock.returnAria": "Put one {label} back in stock",
+  "stock.returnTitle": "Put the last sold piece back in stock",
+  "stock.returned": "{label} put back in stock",
+  "stock.returnLarger": "{label} was sold as part of a bigger sale. Cancel that sale in Sales.",
+  "stock.returnNone": "There is no sale to take back. Use + pcs to add a piece.",
 } as const;
 
 export type Key = keyof typeof en;

@@ -146,6 +146,16 @@ Accounts made by the scripts are marked verified. Unverified Auth accounts stay 
 - Fans see `QrPopup` (a `Sheet` in the app's style, QR on an always-white tile, "Pay now" button + the link's host when `payUrl` is set).
   The staff-only full-screen view (`QrFull`, wake lock) remains only in the Sell sheet's explicit "full screen" action.
 
+## Stock sold / returned
+- Stock rows: `Sold 1` (one piece, one sale via `recordSale`, method quick), a back-arrow that puts the last sold piece back (cancels the newest
+  standing sale of that item with `setSaleUndone`, any time, the sale stays in Sales as Cancelled so takings stay honest), `+ pcs`, edit.
+  A piece sold inside a bigger (multi-item) sale is NOT changed from here: a message points to Sales → Undo.
+- **Product decision: stock is only ever reserved/decremented automatically after a VERIFIED payment** (Stripe webhook, or another gateway/app that
+  confirms the payment). Bank QR/link payments can't be verified by BandMate, so there are no unpaid reservations; the band taps Sold. When Stripe
+  is built: server function creates the Checkout Session and the webhook decrements stock + records the sale in one transaction.
+- Translation keys are global: check `grep '"key"' src/i18n/en.ts` before adding one. Reusing `pay.card` ("Card", the payment-method name in Sell and
+  Sales) for the Stripe tick once showed the wrong label in production; the Stripe tick is `pay.stripe`.
+
 ## Help (in-app manual)
 `src/components/Help.tsx`, shown in Settings under the plan card: expandable topics (one open at a time, `.acc*` styles in `styles.css`).
 Texts are `help.<id>.title/.lead/.b1…bN` in both `en.ts` and `sk.ts`. To add or change a topic edit `TOPICS` in the component (bullet count)
