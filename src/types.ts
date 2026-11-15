@@ -25,6 +25,8 @@ export interface Item {
   qrPath: string | null;
   /** Optional https payment link (from the bank) a fan on a phone can tap instead of scanning. */
   payUrl?: string | null;
+  /** The band ticked card payment (Stripe) for this product. Takes effect once Stripe is connected. */
+  cardPay?: boolean;
   visible: boolean;
   soldOut: boolean;
   order: number;
@@ -45,6 +47,7 @@ export interface Bundle {
   qrUrl: string | null;
   qrPath: string | null;
   payUrl?: string | null;
+  cardPay?: boolean;
   visible: boolean;
   order: number;
   images?: Photo[];

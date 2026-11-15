@@ -85,7 +85,7 @@ Accounts made by the scripts are marked verified. Unverified Auth accounts stay 
 - Top level: `bands/{bandId}` {name, status, createdAt}, `domains/{host}` {bandId}, `platformAdmins/{uid}`,
   `bandRequests/{uid}` (see Tenancy; only the founder and the operator can read it).
 - `members/{uid}`: email, displayName, role, createdAt.
-- `items/{id}`: name, variant (size), price, qrUrl, qrPath, payUrl (optional https payment link), images[{url,path}], visible, soldOut, order. Public if visible.
+- `items/{id}`: name, variant (size), price, qrUrl, qrPath, payUrl (optional https payment link), cardPay (bool, Stripe ticked), images[{url,path}], visible, soldOut, order. Public if visible.
   Sizes of one product share the same `name`; the UI groups by name. Photos belong to the product: the item
   form writes the same `images` to every size of that name (first photo = main). `bundles` also have `images`.
 - `stock/{itemId}`: { qty } — staff only. Kept separate so fans can never read counts.
@@ -139,6 +139,10 @@ Accounts made by the scripts are marked verified. Unverified Auth accounts stay 
   `cleanPayUrl` in `lib/qrdecode.ts`): `uploadImage` reads the QR picture in the browser (`jsqr`, loaded on demand) and, if it
   contains an https link, fills the field; otherwise the band pastes a bank payment link by hand. Slovak PAY by square codes are NOT
   links (only a bank app can read them), so for those the fan popup tells them to save the picture and open it from the banking app.
+- Per product/bundle the band chooses how customers can pay in `PaySection` (`components/ui.tsx`, used by the item and bundle forms): QR picture,
+  payment link, and/or "Card payment (Stripe)" (`cardPay`, can be ticked in advance). A live summary says what is chosen. **With none chosen the
+  product can't be paid for in the app**: the fan page button says "Buy at the table" and the popup says so. Card is shown to fans only when
+  `cardPay` is ticked, and stays a greyed "Coming soon" button until `CARD_CHECKOUT_ENABLED` (`lib/plans.ts`) is true, which needs Stripe + a server function.
 - Fans see `QrPopup` (a `Sheet` in the app's style, QR on an always-white tile, "Pay now" button + the link's host when `payUrl` is set).
   The staff-only full-screen view (`QrFull`, wake lock) remains only in the Sell sheet's explicit "full screen" action.
 

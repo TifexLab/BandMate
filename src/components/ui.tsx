@@ -55,10 +55,10 @@ export function Sheet({ title, onClose, children }: { title: string; onClose: ()
 }
 
 /** What a fan sees after tapping a product: how to pay (bank link, QR, card later), in the app's own style. */
-export function QrPopup({ src, title, sub, payUrl, onClose }: { src: string | null; title: string; sub?: string; payUrl?: string | null; onClose: () => void }) {
+export function QrPopup({ src, title, sub, payUrl, cardPay, onClose }: { src: string | null; title: string; sub?: string; payUrl?: string | null; cardPay?: boolean; onClose: () => void }) {
   const t = useT();
   const link = payUrl ? cleanPayUrl(payUrl) : "";
-  const canPayHere = !!(link || src);
+  const canPayHere = !!(link || src || cardPay);
   return (
     <Sheet title={title} onClose={onClose}>
       {sub && <p className="qr-sub">{sub}</p>}
@@ -80,11 +80,13 @@ export function QrPopup({ src, title, sub, payUrl, onClose }: { src: string | nu
                 {!link && <span className="hint">{t("qr.onPhoneSave")}</span>}
               </div>
             )}
-            <div className="payopt">
-              <button type="button" className="btn ghost block" disabled={!CARD_CHECKOUT_ENABLED}>
-                {t("qr.card")}{!CARD_CHECKOUT_ENABLED && <span className="soon"> · {t("plan.soon")}</span>}
-              </button>
-            </div>
+            {cardPay && (
+              <div className="payopt">
+                <button type="button" className="btn ghost block" disabled={!CARD_CHECKOUT_ENABLED}>
+                  {t("qr.card")}{!CARD_CHECKOUT_ENABLED && <span className="soon"> · {t("plan.soon")}</span>}
+                </button>
+              </div>
+            )}
           </div>
           <p className="notice">{t("qr.verifyAtTable")}</p>
         </>
@@ -93,6 +95,40 @@ export function QrPopup({ src, title, sub, payUrl, onClose }: { src: string | nu
       )}
       <button className="btn ghost block" onClick={onClose}>{t("common.close")}</button>
     </Sheet>
+  );
+}
+
+/** "How can customers pay?" for one product or bundle: QR picture, bank link, card (Stripe). With none chosen the product can't be
+ *  paid for in the app, only at the band's table. */
+export function PaySection({ idPrefix, qrUrl, onQr, payUrl, onPayUrl, cardPay, onCardPay, qrHint }: {
+  idPrefix: string;
+  qrUrl: string | null;
+  onQr: (v: { url: string; path: string; qrText?: string } | null) => void;
+  payUrl: string;
+  onPayUrl: (v: string) => void;
+  cardPay: boolean;
+  onCardPay: (v: boolean) => void;
+  qrHint?: string;
+}) {
+  const t = useT();
+  const methods = [qrUrl && t("pay.qrName"), cleanPayUrl(payUrl) && t("pay.linkName"), cardPay && t("pay.cardName")].filter(Boolean) as string[];
+  return (
+    <fieldset className="paysec">
+      <legend>{t("pay.title")}</legend>
+      <ImageField
+        label={t("item.qr")}
+        folder="qr"
+        url={qrUrl}
+        hint={qrHint}
+        onChange={(v) => {
+          onQr(v);
+          if (v?.qrText && cleanPayUrl(v.qrText) && !payUrl.trim()) onPayUrl(cleanPayUrl(v.qrText)!);
+        }}
+      />
+      <PayLinkField id={`${idPrefix}Pay`} value={payUrl} onChange={onPayUrl} />
+      <Toggle id={`${idPrefix}Card`} checked={cardPay} onChange={onCardPay} label={t("pay.card")} hint={t("pay.cardHint")} />
+      <p className={methods.length ? "paysum" : "paysum none"}>{methods.length ? t("pay.summary", { list: methods.join(", ") }) : t("pay.none")}</p>
+    </fieldset>
   );
 }
 

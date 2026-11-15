@@ -7,7 +7,7 @@ import { useToast } from "../../state/toast";
 import { errorText, groupItems, money } from "../../lib/format";
 import { removeImage } from "../../lib/images";
 import { useT } from "../../i18n";
-import { ConfirmButton, Icon, ImageField, PayLinkField, PhotosField, Sheet, Toggle } from "../../components/ui";
+import { ConfirmButton, Icon, PaySection, PhotosField, Sheet, Toggle } from "../../components/ui";
 import { cleanPayUrl } from "../../lib/qrdecode";
 import type { Bundle, BundlePart, Photo } from "../../types";
 
@@ -64,6 +64,7 @@ function BundleSheet({ bundle, onClose }: { bundle: Bundle | null; onClose: () =
   const [visible, setVisible] = useState(bundle?.visible ?? true);
   const [photos, setPhotos] = useState<Photo[]>(bundle?.images ?? []);
   const [payUrl, setPayUrl] = useState(bundle?.payUrl ?? "");
+  const [cardPay, setCardPay] = useState(bundle?.cardPay ?? false);
   const [qr, setQr] = useState<{ url: string; path: string } | null>(bundle?.qrUrl ? { url: bundle.qrUrl, path: bundle.qrPath || "" } : null);
 
   const setPart = (i: number, p: Partial<BundlePart>) => setParts((ps) => ps.map((x, j) => (j === i ? { ...x, ...p } : x)));
@@ -83,6 +84,7 @@ function BundleSheet({ bundle, onClose }: { bundle: Bundle | null; onClose: () =
       qrUrl: qr?.url ?? null,
       qrPath: qr?.path ?? null,
       payUrl: pay || null,
+      cardPay,
       images: photos,
       order: bundle?.order ?? Math.max(0, ...bundles.map((b) => b.order ?? 0)) + 1,
     }).catch((x) => toast(errorText(x)));
@@ -118,8 +120,7 @@ function BundleSheet({ bundle, onClose }: { bundle: Bundle | null; onClose: () =
           <span className="hint">{t("bundles.insideHint")}</span>
         </div>
         <PhotosField label={t("item.photos")} photos={photos} onChange={setPhotos} hint={t("bundles.photosHint")} />
-        <ImageField label={t("item.qr")} folder="qr" url={qr?.url ?? null} onChange={(v) => { setQr(v); if (v?.qrText && cleanPayUrl(v.qrText) && !payUrl.trim()) setPayUrl(cleanPayUrl(v.qrText)!); }} />
-        <PayLinkField id="bPay" value={payUrl} onChange={setPayUrl} />
+        <PaySection idPrefix="b" qrUrl={qr?.url ?? null} onQr={setQr} payUrl={payUrl} onPayUrl={setPayUrl} cardPay={cardPay} onCardPay={setCardPay} />
         <Toggle id="bVisible" checked={visible} onChange={setVisible} label={t("item.visible")} />
         <button className="btn primary block">{bundle ? t("bundles.save") : t("bundles.create")}</button>
         {bundle && (
