@@ -69,7 +69,9 @@ service cloud.firestore {
         && (!('domain' in request.resource.data) || (request.resource.data.domain is string && request.resource.data.domain.size() <= 253))
         && request.resource.data.get('plan', 'free') == 'free';  // Paid can't be asked for until online payment exists
       allow update: if platformAdmin();
-      allow delete: if (verified() && request.auth.uid == uid && resource.data.status in ['pending', 'rejected']) || platformAdmin();
+      // A founder can withdraw a waiting/rejected request, and an approved one in the same step that deletes their own band.
+      allow delete: if (verified() && request.auth.uid == uid && (resource.data.status in ['pending', 'rejected']
+          || !existsAfter(/databases/$(database)/documents/bands/$(resource.data.bandId)))) || platformAdmin();
     }
 
     match /bands/{bandId} {
@@ -91,7 +93,10 @@ service cloud.firestore {
 
       // Name/status of one band is public (needed to show its store); the list of all bands is not.
       allow get: if true;
-      allow list, write: if platformAdmin();
+      // The operator manages every band. A band's own admin may delete their band (data is removed first, see
+      // lib/platform.ts deleteOwnBand); the few documents that stay locked otherwise can only go in that same step.
+      allow list, create, update: if platformAdmin();
+      allow delete: if isAdmin();
 
       match /members/{uid} {
         allow read: if verified() && (request.auth.uid == uid || isStaff());
@@ -112,7 +117,8 @@ service cloud.firestore {
         allow update: if (isAdmin() && (request.auth.uid != uid || onlyChanges(['displayName'])))
           || (verified() && request.auth.uid == uid && onlyChanges(['displayName']));
 
-        allow delete: if (isAdmin() && request.auth.uid != uid) || platformAdmin(); // the operator may remove anyone, even their own membership (deleting a whole band)
+        allow delete: if (isAdmin() && request.auth.uid != uid) || platformAdmin()
+          || (isAdmin() && !existsAfter(bandRef())); // an admin's own membership goes only together with their band
       }
 
       // Public catalogue: fans see visible items and prices, never stock counts.
@@ -144,7 +150,7 @@ service cloud.firestore {
         allow create: if isStaff();
         allow update: if isStaff() && (paid()
           || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['theme', 'preset', 'logoUrl', 'logoPath', 'logoOpacity', 'logoInHeader']));
-        allow delete: if platformAdmin();
+        allow delete: if platformAdmin() || (isAdmin() && !existsAfter(bandRef())); // only together with the band
       }
       // Current gig and other internal settings.
       match /settings/band {
@@ -161,7 +167,7 @@ service cloud.firestore {
           && request.resource.data.get('members', 0) >= 0
           && (platformAdmin()
             || request.resource.data.get('limitBytes', null) == (resource == null ? null : resource.data.get('limitBytes', null)));
-        allow delete: if platformAdmin();
+        allow delete: if platformAdmin() || (isAdmin() && !existsAfter(bandRef())); // only together with the band
       }
 
       // Invitations to join (paid plans). Doc id = the invited person's lowercase email address.

@@ -117,6 +117,23 @@ async function deleteStorageFolder(path: string) {
   for (const p of res.prefixes) await deleteStorageFolder(p.fullPath);
 }
 
+/** A band's own admin erases their band (data, pictures, people) and their registration request, so they can register again,
+ *  e.g. after a typo in the address. The security rules allow the last few documents to go only in the final batch, together with
+ *  the band itself. Their login stays. Irreversible. */
+export async function deleteOwnBand(bandId: string, uid: string) {
+  await deleteStorageFolder(`bands/${bandId}`); // first: it needs their membership
+  for (const sub of ["sales", "items", "stock", "bundles", "invites"]) await deleteAllIn(collection(db, "bands", bandId, sub));
+  const members = await getDocs(collection(db, "bands", bandId, "members"));
+  await Promise.all(members.docs.filter((d) => d.id !== uid).map((d) => deleteDoc(d.ref)));
+  const req = await getDoc(requestDoc(uid));
+  const b = writeBatch(db);
+  for (const id of ["public", "band", "usage"]) b.delete(doc(db, "bands", bandId, "settings", id));
+  b.delete(doc(db, "bands", bandId, "members", uid));
+  if (req.exists() && req.data().bandId === bandId) b.delete(requestDoc(uid)); // so a new request can be filed
+  b.delete(doc(db, "bands", bandId));
+  await b.commit();
+}
+
 /** Erases a band completely: its data, pictures, addresses and registration request. Irreversible.
  *  The band record goes last, so an interrupted run can simply be started again. */
 export async function deleteBand(bandId: string) {

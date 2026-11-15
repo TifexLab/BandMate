@@ -103,6 +103,7 @@ function AlreadyInBand({ email, band }: { email: string; band: MyBand }) {
     <>
       <h1>{t("start.alreadyTitle")}</h1>
       <p className="note">{t("start.alreadyText", { email, name: band.name })}</p>
+      <p className="hint">{t("start.alreadyFix")}</p>
       <div className="stack-sm">
         <Link className="btn primary block" to={`/b/${band.bandId}/band`}>{t("start.openBand")}</Link>
         <button className="btn ghost block" onClick={() => signOut(auth)}>{t("common.signOut")}</button>

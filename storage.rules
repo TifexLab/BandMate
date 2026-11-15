@@ -38,9 +38,9 @@ service firebase.storage {
         <= (firestore.exists(usagePath(bandId)) ? firestore.get(usagePath(bandId)).data.get('limitBytes', 52428800) : 52428800);
     }
 
-    // Listing a band's folders (to delete a whole band) is for the BandMate operator only.
+    // Listing a band's folders (to delete a whole band) is for the BandMate operator and the band's own members.
     match /bands/{bandId}/{allPaths=**} {
-      allow list: if isPlatform();
+      allow list: if isMemberOf(bandId) || isPlatform();
     }
 
     match /bands/{bandId}/{folder}/{file} {

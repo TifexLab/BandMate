@@ -486,3 +486,6 @@ input[type="range"] { width: 100%; accent-color: var(--primary); }
 .paysec legend { padding: 0 6px; font-weight: 700; }
 .paysum { margin: 0; padding: 9px 12px; border-radius: var(--r); background: var(--ok-soft); color: var(--ok-ink); font-size: .9rem; font-weight: 700; }
 .paysum.none { background: var(--low-soft); color: var(--low-ink); }
+
+/* ---- Settings: delete-this-band card ---- */
+.danger-zone { border: 1.5px solid color-mix(in srgb, var(--out) 55%, var(--surface)); }

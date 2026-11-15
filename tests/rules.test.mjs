@@ -266,7 +266,8 @@ test("band requests: one per verified account, valid address, terms stamped by t
   const op = as(ids.platform);
   await assertSucceeds(getDocs(collection(op, "bandRequests")));
   await assertSucceeds(updateDoc(mine(op), { status: "approved" }));
-  await assertFails(deleteDoc(mine(founder))); // approved: the founder can no longer withdraw it
+  await env.withSecurityRulesDisabled((ctx) => setDoc(doc(ctx.firestore(), "bands", "helloween"), { name: "Helloween", status: "active" })); // the band now exists
+  await assertFails(deleteDoc(mine(founder))); // approved and the band exists: the founder cannot withdraw it
   await assertSucceeds(deleteDoc(doc(as("u-founder2", "f2@x.com"), "bandRequests", "u-founder2"))); // a pending one can be withdrawn
 });
 
@@ -286,10 +287,8 @@ test("'which bands am I in': a person finds only their own memberships, by their
   await assertSucceeds(getDocs(collectionGroup(op, "members")));
 });
 
-test("only the BandMate operator can wipe a band; a band's own admin cannot delete the band", async () => {
-  const admin = as(ids.adminA);
-  await assertFails(deleteDoc(doc(admin, "bands", "a"))); // not even its own admin
-  await assertFails(deleteDoc(doc(as(ids.mateA), "bands", "a")));
+test("the BandMate operator can wipe any band; a band mate or another band's admin cannot", async () => {
+  await assertFails(deleteDoc(doc(as(ids.mateA), "bands", "a"))); // a band mate cannot
   await assertFails(deleteDoc(doc(fan(), "bands", "a")));
   const op = as(ids.platform);
   const p = (...x) => doc(op, "bands", "b", ...x);
@@ -311,7 +310,8 @@ test("only the BandMate operator can wipe a band; a band's own admin cannot dele
   assert.ok((await assertSucceeds(listing(ids.platform))).items.some((i) => i.name === "x.png")); // the operator can list a band's folders
   await assertSucceeds(listAll(ref(authed(ids.platform).storage(), "bands/a"))); // and the band's top folder
   const top = (who) => listAll(ref(who === null ? env.unauthenticatedContext().storage() : authed(who).storage(), "bands/a"));
-  await assertFails(top(ids.adminA)); // a band's own admin cannot list the whole band folder
+  await assertSucceeds(top(ids.adminA)); // a band's own members may list their band's folder (to delete their band)
+  await assertFails(top(ids.adminB)); // but not another band's
   await assertFails(top(ids.pendA));
   await assertFails(top(null)); // nor can the public
   await assertFails(deleteObject(ref(authed(ids.pendA).storage(), "bands/a/photos/x.png"))); // not staff
@@ -448,4 +448,48 @@ test("a band created before plans existed (no plan fields, usage without bytes) 
   await env.withSecurityRulesDisabled((ctx) => deleteDoc(doc(ctx.firestore(), "bands", "old", "settings", "usage"))); // and with no usage record at all
   await assertSucceeds(up(authed("u-old"), "bands/old/qr/q2.png"));
   await assertSucceeds(addItem(as("u-old"), "old", "second"));
+});
+
+test("a band's admin can delete their own band, but only in one step and never someone else's", async () => {
+  await env.withSecurityRulesDisabled(async (ctx) => {
+    await setDoc(doc(ctx.firestore(), "bandRequests", ids.adminA), { uid: ids.adminA, email: `${ids.adminA}@x.com`, bandId: "a", bandName: "Band a", status: "approved", termsVersion: "v1", createdAt: 1 });
+  });
+  const admin = as(ids.adminA, `${ids.adminA}@x.com`);
+  const p = (...x) => doc(admin, "bands", "a", ...x);
+  // other people cannot
+  await assertFails(deleteDoc(doc(as(ids.mateA), "bands", "a")));
+  await assertFails(deleteDoc(doc(as(ids.adminB), "bands", "a"))); // another band's admin
+  await assertFails(deleteDoc(doc(admin, "bands", "b"))); // not their band
+  await assertFails(deleteDoc(doc(fan(), "bands", "a")));
+  // the locked pieces cannot be removed on their own (that would dodge the Free plan's design lock or the one-band rule)
+  await assertFails(deleteDoc(p("settings", "public")));
+  await assertFails(deleteDoc(p("settings", "usage")));
+  await assertFails(deleteDoc(p("members", ids.adminA))); // own membership alone
+  await assertFails(deleteDoc(doc(admin, "bandRequests", ids.adminA))); // an approved request while the band still exists
+  // storage: the band's own members may list their folders, nobody else
+  const list = (ctx, path) => listAll(ref(ctx.storage(), path));
+  await assertSucceeds(list(authed(ids.adminA), "bands/a/photos"));
+  await assertSucceeds(list(authed(ids.mateA), "bands/a"));
+  await assertFails(list(authed(ids.adminB), "bands/a"));
+  await assertFails(list(env.unauthenticatedContext(), "bands/a"));
+  await assertFails(list(authed(ids.pendA), "bands/a")); // pending is not a member
+  // the whole thing, in the order the app does it
+  await assertSucceeds(deleteDoc(p("sales", "s1")));
+  await assertSucceeds(deleteDoc(p("items", "hat")));
+  await assertSucceeds(deleteDoc(p("items", "secret")));
+  await assertSucceeds(deleteDoc(p("stock", "hat")));
+  for (const u of [ids.mateA, ids.pendA, ids.offA, ids.both]) await assertSucceeds(deleteDoc(p("members", u)));
+  const w = writeBatch(admin);
+  for (const id of ["public", "band", "usage"]) w.delete(p("settings", id));
+  w.delete(p("members", ids.adminA));
+  w.delete(doc(admin, "bandRequests", ids.adminA));
+  w.delete(doc(admin, "bands", "a"));
+  await assertSucceeds(w.commit());
+  // and it is really gone: the former admin can no longer reach anything, and can file a new request
+  await assertFails(getDoc(doc(admin, "bands", "a", "stock", "hat")));
+  await assertFails(setDoc(doc(admin, "bands", "a", "items", "x"), { name: "X", visible: true }));
+  const { serverTimestamp } = await import("firebase/firestore");
+  await assertSucceeds(setDoc(doc(admin, "bandRequests", ids.adminA), { uid: ids.adminA, email: `${ids.adminA}@x.com`, displayName: "A", bandName: "Band A2", bandId: "band-a-two", termsVersion: "v1", termsAcceptedAt: serverTimestamp(), status: "pending", createdAt: 2, plan: "free" }));
+  // band b is untouched
+  await assertSucceeds(getDoc(doc(as(ids.adminB), "bands", "b", "stock", "hat")));
 });

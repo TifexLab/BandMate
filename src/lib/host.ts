@@ -26,6 +26,11 @@ export function subdomainBandId(host: string = window.location.hostname): string
   return /^[a-z0-9]+(-[a-z0-9]+)*$/.test(label) && !RESERVED_BAND_IDS.includes(label) ? label : null;
 }
 
+/** A page on the BandMate address itself (e.g. /start), from wherever the visitor is now. */
+export function platformUrl(path = "/") {
+  return isPlatformHost() ? path : `https://${PLATFORM_HOST}${path}`;
+}
+
 /** Where the BandMate admin login lives (a different address when running on a band's own domain). */
 export function platformAdminUrl() {
   const path = "/platform/login";

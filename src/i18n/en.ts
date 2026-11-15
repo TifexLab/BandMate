@@ -601,6 +601,17 @@ export const en = {
   "stock.returned": "{label} put back in stock",
   "stock.returnLarger": "{label} was sold as part of a bigger sale. Cancel that sale in Sales.",
   "stock.returnNone": "There is no sale to take back. Use + pcs to add a piece.",
+  "mydel.cardTitle": "Delete this band",
+  "mydel.cardText": "Made a typo in the address or name? Delete this band and register a new one. The name can also be changed above, but the address can't. Your login stays.",
+  "mydel.open": "Delete this band…",
+  "mydel.title": "Delete {name}?",
+  "mydel.warn": "This erases the stock, sales, pictures, invitations and people of this band for good, and the address {id} becomes free again. You can't undo this.",
+  "mydel.type": "Type {id} to confirm",
+  "mydel.go": "Delete this band for good",
+  "mydel.deleting": "Deleting…",
+  "mydel.failed": "Couldn't finish deleting. Try again; what is already deleted stays deleted.",
+  "start.alreadyFix": "Made a typo in the address? Open Settings in your band, use Delete this band, and register again.",
+  "help.account.b4": "A typo in the band's address? The name can be changed in Settings → Band, but the address can't. Admins can delete the band in Settings (Delete this band) and register a new one. Everything in the band is erased for good.",
 } as const;
 
 export type Key = keyof typeof en;

@@ -20,7 +20,7 @@ const TOPICS: { id: string; bullets: number; icon: ReactNode }[] = [
   { id: "look", bullets: 3, icon: svg("M12 3a9 9 0 1 0 0 18c1.5 0 2-1 1.5-2-.6-1.2.2-2.5 1.6-2.5H17a4 4 0 0 0 4-4c0-5-4-9.5-9-9.5zM7.5 11h0M10 7.5h0M14.5 7.5h0") },
   { id: "people", bullets: 4, icon: svg("M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM2 21a7 7 0 0 1 14 0M16 3.5a4 4 0 0 1 0 7M18 14a6 6 0 0 1 4 7") },
   { id: "plans", bullets: 4, icon: svg("M12 2l3 6.5 7 1-5 5 1.2 7L12 18l-6.2 3.5L7 14.500l-5-5 7-1z") },
-  { id: "account", bullets: 3, icon: svg("M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0") },
+  { id: "account", bullets: 4, icon: svg("M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0") },
 ];
 
 /** Expandable manual: tap a topic to open how that part of the app works. One topic is open at a time. */

@@ -58,6 +58,13 @@ email/password, Firestore, Storage), hosted on Vercel, code on GitHub. Setup ste
   sales/items/stock/bundles/members/settings, its Storage folder, its `domains` and `bandRequests` entries, then the band doc.
   Operator only (storage.rules allows `list` on `bands/**` for the operator alone). Firebase Auth accounts of its people stay
   (a browser can't delete users). A band's own admin cannot delete the band.
+- **A band's own admin can delete their band** (Settings → "Delete this band", `DeleteBandCard.tsx`, `deleteOwnBand` in `lib/platform.ts`; type the
+  address to confirm), e.g. after a typo in the address (the address, i.e. `bandId`, can never be renamed; the display name can). It removes
+  Storage, sales/items/stock/bundles/invites, other members, then ONE final batch: settings docs + their own membership + their approved
+  `bandRequests` doc + the band doc. The rules only allow those last pieces together with the band going away (`existsAfter(bandRef())`),
+  so nobody can delete `settings/public` alone (that would dodge the Free design lock) or their own membership alone. Afterwards they land on
+  `/start` (`platformUrl`) and can register again; the old address is free. A pending/rejected request is withdrawn from the status screen.
+  Not removed: a `domains/{host}` entry for a Pro band (operator deletes it in the console).
 - Create a band by script: `node scripts/create-band.mjs <bandId> "<Name>" <adminEmail> [--domain host] [--sample]`.
   Create the operator: `node scripts/create-platform-admin.mjs <email>`. A band's own custom domain also has to be added
   to the Vercel project and to Firebase Auth -> Authorized domains by hand for now (without that, the
