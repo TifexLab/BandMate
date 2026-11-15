@@ -3,6 +3,7 @@ import { removeImage, uploadImage } from "../lib/images";
 import { errorText } from "../lib/format";
 import { LimitError } from "../lib/planState";
 import { cleanPayUrl, hostOf } from "../lib/qrdecode";
+import { CARD_CHECKOUT_ENABLED } from "../lib/plans";
 import { LimitNote } from "./plans";
 import { useT } from "../i18n";
 import type { Photo } from "../types";
@@ -53,25 +54,43 @@ export function Sheet({ title, onClose, children }: { title: string; onClose: ()
   );
 }
 
-/** The same QR (and optional payment link) as a popup in the app's own style, for fans browsing the shop. */
+/** What a fan sees after tapping a product: how to pay (bank link, QR, card later), in the app's own style. */
 export function QrPopup({ src, title, sub, payUrl, onClose }: { src: string | null; title: string; sub?: string; payUrl?: string | null; onClose: () => void }) {
   const t = useT();
   const link = payUrl ? cleanPayUrl(payUrl) : "";
+  const canPayHere = !!(link || src);
   return (
     <Sheet title={title} onClose={onClose}>
       {sub && <p className="qr-sub">{sub}</p>}
-      {src && (
-        <div className="qr-tile">
-          <img src={src} alt={t("qr.alt", { title })} />
-        </div>
-      )}
-      {link && (
+      {canPayHere ? (
         <>
-          <a className="btn primary block" href={link} target="_blank" rel="noopener noreferrer">{t("qr.payNow")}</a>
-          <span className="hint center">{t("qr.opens", { host: hostOf(link) })}</span>
+          <div className="payopts">
+            {link && (
+              <div className="payopt">
+                <a className="btn primary block" href={link} target="_blank" rel="noopener noreferrer">{t("qr.payBank")}</a>
+                <span className="hint center">{t("qr.opens", { host: hostOf(link) })}</span>
+              </div>
+            )}
+            {src && (
+              <div className="payopt">
+                <span className="label">{link ? t("qr.orScan") : t("qr.scanTitle")}</span>
+                <div className="qr-tile">
+                  <img src={src} alt={t("qr.alt", { title })} />
+                </div>
+                {!link && <span className="hint">{t("qr.onPhoneSave")}</span>}
+              </div>
+            )}
+            <div className="payopt">
+              <button type="button" className="btn ghost block" disabled={!CARD_CHECKOUT_ENABLED}>
+                {t("qr.card")}{!CARD_CHECKOUT_ENABLED && <span className="soon"> · {t("plan.soon")}</span>}
+              </button>
+            </div>
+          </div>
+          <p className="notice">{t("qr.verifyAtTable")}</p>
         </>
+      ) : (
+        <p className="note">{t("qr.payAtTable")}</p>
       )}
-      {src ? <p className="hint">{link ? t("qr.onPhoneLink") : t("qr.onPhoneSave")}</p> : !link && <p className="note">{t("qr.payAtTable")}</p>}
       <button className="btn ghost block" onClick={onClose}>{t("common.close")}</button>
     </Sheet>
   );

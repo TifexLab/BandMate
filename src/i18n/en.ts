@@ -515,7 +515,7 @@ export const en = {
   "qr.onPhoneLink": "Scanning from another phone? Use the code. On this phone? Tap Pay now, or hold the picture to save it and open it from your banking app.",
   "qr.onPhoneSave": "Scanning from another phone? Use the code. On this phone? Hold the picture to save it, then open it from your banking app (many banks can read a QR code from your photos).",
   "item.payUrl": "Payment link (optional)",
-  "item.payUrlHint": "Fans on a phone can't scan a code on their own screen. If your bank gives you a payment link, paste it here and they get a Pay now button. A link found inside your QR picture is filled in for you.",
+  "item.payUrlHint": "Fans on a phone can't scan a code on their own screen. If your bank gives you a payment link, paste it here and they get a Pay with your bank button. A link found inside your QR picture is filled in for you.",
   "item.payUrlBad": "The link must be a web address starting with https://",
   "help.title": "Help",
   "help.intro": "Tap a topic to open a short explanation of how that part of BandMate works.",
@@ -536,7 +536,7 @@ export const en = {
   "help.qr.lead": "You upload a QR picture from your own bank app. BandMate never touches the money.",
   "help.qr.b1": "In your banking app (or SumUp, Revolut…) create a payment request for the price and save its QR as a picture. Upload it to the item in Stock.",
   "help.qr.b2": "Fans scan it with their banking app and pay you directly. You see the confirmation on their phone and mark the item sold.",
-  "help.qr.b3": "A fan on a phone can't scan their own screen. If your bank gives you a payment link (https://), paste it into Payment link and the fan gets a Pay now button. A link inside your QR picture is filled in for you.",
+  "help.qr.b3": "A fan on a phone can't scan their own screen. If your bank gives you a payment link (https://), paste it into Payment link and the fan gets a Pay with your bank button. A link inside your QR picture is filled in for you.",
   "help.qr.b4": "Slovak PAY by square codes are not links. For those, the fan saves the picture and opens it from their banking app.",
   "help.qr.b5": "QR pictures count towards your picture space.",
   "help.sell.title": "Selling at the table",
@@ -559,7 +559,7 @@ export const en = {
   "help.fan.lead": "Fans see your shop at your own address: yourband.bandmate.shop.",
   "help.fan.b1": "In Settings → Band there is an Open fan page button. Share the address or put it on a poster.",
   "help.fan.b2": "Fans see photos, prices and sizes. A sold-out item is marked Sold out; they never see how many pieces you have.",
-  "help.fan.b3": "A fan taps an item and a window opens with the payment QR and, if you added one, a Pay now button.",
+  "help.fan.b3": "A fan taps an item and a window opens with the ways to pay: a Pay with your bank button if you added a link, the payment QR, and card (coming later).",
   "help.fan.b4": "The line under the band name is the tagline, set in Settings → Band.",
   "help.look.title": "Look and top bar",
   "help.look.lead": "Make the shop look like your band.",
@@ -583,6 +583,11 @@ export const en = {
   "help.account.b1": "In Settings → Your account you can change your name and password, and sign out.",
   "help.account.b2": "The language switch (EN or SK) is at the top of the screen.",
   "help.account.b3": "Forgot your password? Use Forgot password? on the login page and we send you a link.",
+  "qr.payBank": "Pay with your bank",
+  "qr.orScan": "Or scan this code with another phone's banking app",
+  "qr.scanTitle": "Scan with your banking app",
+  "qr.card": "Pay by card",
+  "qr.verifyAtTable": "The band checks your payment at their table. Show them the payment confirmation.",
 } as const;
 
 export type Key = keyof typeof en;

@@ -474,3 +474,9 @@ input[type="range"] { width: 100%; accent-color: var(--primary); }
 .acc-in ul { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; font-size: .95rem; line-height: 1.4; }
 .acc-in li::marker { color: var(--primary); }
 @media (prefers-reduced-motion: reduce) { .acc-panel, .acc-chev { transition: none; } }
+
+/* ---- product window: payment options ---- */
+.payopts { display: flex; flex-direction: column; gap: 14px; }
+.payopt { display: flex; flex-direction: column; gap: 8px; }
+.payopt .soon { font-weight: 400; opacity: .8; }
+.notice { margin: 0; padding: 10px 12px; border-radius: var(--r); background: var(--primary-soft); font-size: .9rem; line-height: 1.35; }

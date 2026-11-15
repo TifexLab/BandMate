@@ -21,6 +21,10 @@ export const PRICE_PACK = 2;
  *  switched on by the BandMate operator in the console, and the sign-up form offers Free only. */
 export const PAID_CHECKOUT_ENABLED = false;
 
+/** Card payment in the shop (needs Stripe, not built yet). While false, the product window shows the card option greyed out
+ *  with "Coming soon". */
+export const CARD_CHECKOUT_ENABLED = false;
+
 export interface Limits {
   plan: Plan;
   items: number;
