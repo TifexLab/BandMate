@@ -8,6 +8,7 @@ import { useSettings } from "../../state/settings";
 import { useBand } from "../../state/band";
 import { useTenant } from "../../state/tenant";
 import { ExtendButton, UsageCard } from "../../components/plans";
+import InstallCard from "../../components/InstallCard";
 import Help from "../../components/Help";
 import DeleteBandCard from "../../components/DeleteBandCard";
 import { roleLabel, useAuth } from "../../state/auth";
@@ -28,6 +29,7 @@ export default function SettingsPage() {
   return (
     <div className="flow">
       <PlanSection />
+      <InstallCard />
       <Help />
       <BandSection />
       <LookSection />
