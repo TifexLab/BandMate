@@ -69,6 +69,7 @@ export default function Stock() {
       )}
       <div className="flow">
       {groups.map((g) => {
+        const photo = (grp: typeof g, it: Item) => it.images?.[0]?.url || grp.items.find((i) => i.images?.length)?.images?.[0]?.url;
         const total = g.items.reduce((sum, i) => sum + (stock[i.id] ?? 0), 0);
         return (
           <section className="group" key={g.key}>
@@ -80,8 +81,8 @@ export default function Stock() {
               const n = stock[it.id] ?? 0;
               return (
                 <div className="row" key={it.id}>
-                  <button className={`qrthumb ${it.qrUrl ? "has" : ""}`} onClick={() => (it.qrUrl ? setZoom(it) : setEdit(it))} aria-label={it.qrUrl ? t("stock.showQr") : t("stock.addQr")}>
-                    {it.qrUrl ? <img src={it.qrUrl} alt="" /> : t("stock.plusQr")}
+                  <button className={`qrthumb ${photo(g, it) ? "has" : ""}`} onClick={() => setEdit(it)} aria-label={photo(g, it) ? t("stock.editAria", { label: itemLabel(it) }) : t("stock.addPhoto")}>
+                    {photo(g, it) ? <img src={photo(g, it)} alt="" /> : t("stock.plusPhoto")}
                   </button>
                   <div className="lbl">
                     <b>
@@ -89,6 +90,7 @@ export default function Stock() {
                       {!it.visible && <span className="hidden-tag" title={t("stock.hiddenTitle")}>{Icon.eyeOff} {t("stock.hidden")}</span>}
                     </b>
                     <small className="num">{money(it.price, cur)}</small>
+                    {it.qrUrl && <button className="qrchip" onClick={() => setZoom(it)} aria-label={t("stock.showQr")}>QR</button>}
                   </div>
                   <span className={`pill ${pill(n)} num`} title={n < 0 ? t("stock.oversold") : undefined}>
                     {n < 0 ? t("stock.over", { m: Math.abs(n) }) : n}

@@ -265,6 +265,8 @@ export const en = {
   "stock.showQr": "Show QR",
   "stock.addQr": "Add QR picture",
   "stock.plusQr": "+ QR",
+  "stock.addPhoto": "Add product photo",
+  "stock.plusPhoto": "+ Photo",
   "stock.hidden": "hidden",
   "stock.hiddenTitle": "Hidden from fans",
   "stock.over": "{m} over",

@@ -185,7 +185,8 @@ h2.sec {
   display: flex; align-items: center; justify-content: center; font-size: .65rem; font-weight: 700; color: var(--muted);
 }
 .qrthumb.has { border-style: solid; }
-.qrthumb img { width: 100%; height: 100%; object-fit: contain; background: #fff; }
+.qrthumb img { width: 100%; height: 100%; object-fit: cover; }
+.qrchip { margin-left: 8px; min-height: 28px; padding: 0 8px; border-radius: 6px; border: 1px solid var(--line); background: var(--bg); color: var(--muted); font-size: .7rem; font-weight: 700; }
 .lbl { min-width: 0; }
 .lbl b { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; overflow-wrap: anywhere; }
 .lbl small { color: var(--muted); display: block; }

@@ -267,6 +267,8 @@ export const sk: Record<Key, string> = {
   "stock.showQr": "Zobraziť QR",
   "stock.addQr": "Pridať QR obrázok",
   "stock.plusQr": "+ QR",
+  "stock.addPhoto": "Pridať fotku produktu",
+  "stock.plusPhoto": "+ Foto",
   "stock.hidden": "skryté",
   "stock.hiddenTitle": "Skryté pred fanúšikmi",
   "stock.over": "o {m} viac",
