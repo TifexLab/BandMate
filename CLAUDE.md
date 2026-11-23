@@ -157,6 +157,13 @@ Accounts made by the scripts are marked verified. Unverified Auth accounts stay 
 - Stock rows: `Sold 1` (one piece, one sale via `recordSale`, method quick), a back-arrow that puts the last sold piece back (cancels the newest
   standing sale of that item with `setSaleUndone`, any time, the sale stays in Sales as Cancelled so takings stay honest), `+ pcs`, edit.
   A piece sold inside a bigger (multi-item) sale is NOT changed from here: a message points to Sales → Undo.
+- New product form (`ItemSheet` in `pages/band/Stock.tsx`, `components/SizePicker.tsx`): a row of size cells XS S M L XL XXL 3XL + `+` for own sizes;
+  tap a size to switch it on and type its pieces under it (each size has its own count; one price for all sizes, a different price = a separate
+  product). No size on = one size, one number. Sizes the product (same name) already has show as switched-off cells. Each size is still its own
+  `items` doc (`createItems(base, [{variant, qty}], order)`); editing an existing item keeps the plain size text box. CSS note: `.sizepick .sizecount`
+  needs `!important` on width because `.field input:not(...)` is more specific.
+- Sell tab: a size chip / one-size button that is already in the basket gets a `−` next to it (`removeOne` in `pages/band/Sell.tsx`) that takes one piece out;
+  at zero the line disappears.
 - **Product decision: stock is only ever reserved/decremented automatically after a VERIFIED payment** (Stripe webhook, or another gateway/app that
   confirms the payment). Bank QR/link payments can't be verified by BandMate, so there are no unpaid reservations; the band taps Sold. When Stripe
   is built: server function creates the Checkout Session and the webhook decrements stock + records the sale in one transaction.

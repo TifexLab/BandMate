@@ -9,6 +9,7 @@ import { addStock, createItems, deleteItem, recordSale, setSaleUndone, setStockC
 import { removeImage } from "../../lib/images";
 import { useT } from "../../i18n";
 import { ConfirmButton, Icon, PaySection, PhotosField, QrPopup, Sheet, Toggle } from "../../components/ui";
+import SizePicker, { PRESET_SIZES } from "../../components/SizePicker";
 import { cleanPayUrl } from "../../lib/qrdecode";
 import type { Item, Photo } from "../../types";
 
@@ -180,6 +181,10 @@ function ItemSheet({ item, onClose }: { item: Item | null; onClose: () => void }
   const [variant, setVariant] = useState(item?.variant ?? "");
   const [price, setPrice] = useState(item ? String(item.price) : "");
   const [count, setCount] = useState(item ? String(stock[item.id] ?? 0) : "");
+  // New product: the sizes switched on (size -> pieces typed), own sizes added next to the ready-made ones, and the one number for no sizes.
+  const [sizeCounts, setSizeCounts] = useState<Record<string, string>>({});
+  const [customSizes, setCustomSizes] = useState<string[]>([]);
+  const [oneCount, setOneCount] = useState("");
   const [visible, setVisible] = useState(item?.visible ?? true);
   const [qr, setQr] = useState<{ url: string; path: string } | null>(item?.qrUrl ? { url: item.qrUrl, path: item.qrPath || "" } : null);
   const [payUrl, setPayUrl] = useState(item?.payUrl ?? "");
@@ -213,10 +218,11 @@ function ItemSheet({ item, onClose }: { item: Item | null; onClose: () => void }
       if (applyQrToGroup) siblings.forEach((s) => done(updateItem(s.id, { qrUrl: qr?.url ?? null, qrPath: qr?.path ?? null, payUrl: pay || null, cardPay })));
       toast(t("item.saved", { label: itemLabel({ name, variant }) }));
     } else {
-      const variants = variant.split(",").map((v) => v.trim()).filter(Boolean);
+      const picked = [...PRESET_SIZES, ...customSizes].filter((sz) => sz in sizeCounts);
+      const variants = picked.length ? picked.map((sz) => ({ variant: sz, qty: Math.max(0, parseInt(sizeCounts[sz]) || 0) })) : [{ variant: "", qty: Math.max(0, parseInt(oneCount) || 0) }];
       const order = Math.max(0, ...items.map((i) => i.order ?? 0)) + 1;
       try {
-        done(createItems({ name: name.trim(), price: p, qrUrl: qr?.url ?? null, qrPath: qr?.path ?? null, payUrl: pay || null, cardPay, visible, images: shownPhotos }, variants, q, order));
+        done(createItems({ name: name.trim(), price: p, qrUrl: qr?.url ?? null, qrPath: qr?.path ?? null, payUrl: pay || null, cardPay, visible, images: shownPhotos }, variants, order));
       } catch (limit) {
         return toast(errorText(limit)); // over the plan's item limit: keep the form open so nothing typed is lost
       }
@@ -234,21 +240,42 @@ function ItemSheet({ item, onClose }: { item: Item | null; onClose: () => void }
           <datalist id="nameList">{names.map((n) => <option key={n} value={n} />)}</datalist>
           <span className="hint">{t("item.itemHint")}</span>
         </div>
-        <div className="field">
-          <label htmlFor="fVar">{t("item.variant")}</label>
-          <input id="fVar" value={variant} onChange={(e) => setVariant(e.target.value)} placeholder={item ? t("item.variantPhEdit") : t("item.variantPhNew")} />
-          <span className="hint">{item ? t("item.variantHintEdit") : t("item.variantHintNew")}</span>
-        </div>
-        <div className="two">
-          <div className="field">
-            <label htmlFor="fPrice">{t("item.price", { cur: settings.currency })}</label>
-            <input id="fPrice" type="number" inputMode="decimal" min="0" step="0.01" required value={price} onChange={(e) => setPrice(e.target.value)} />
-          </div>
-          <div className="field">
-            <label htmlFor="fCount">{item ? t("item.pieces") : t("item.piecesEach")}</label>
-            <input id="fCount" type="number" inputMode="numeric" min="0" step="1" required value={count} onChange={(e) => setCount(e.target.value)} />
-          </div>
-        </div>
+        {item ? (
+          <>
+            <div className="field">
+              <label htmlFor="fVar">{t("item.variant")}</label>
+              <input id="fVar" value={variant} onChange={(e) => setVariant(e.target.value)} placeholder={t("item.variantPhEdit")} />
+              <span className="hint">{t("item.variantHintEdit")}</span>
+            </div>
+            <div className="two">
+              <div className="field">
+                <label htmlFor="fPrice">{t("item.price", { cur: settings.currency })}</label>
+                <input id="fPrice" type="number" inputMode="decimal" min="0" step="0.01" required value={price} onChange={(e) => setPrice(e.target.value)} />
+              </div>
+              <div className="field">
+                <label htmlFor="fCount">{t("item.pieces")}</label>
+                <input id="fCount" type="number" inputMode="numeric" min="0" step="1" required value={count} onChange={(e) => setCount(e.target.value)} />
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="field">
+              <label htmlFor="fPrice">{t("item.price", { cur: settings.currency })}</label>
+              <input id="fPrice" type="number" inputMode="decimal" min="0" step="0.01" required value={price} onChange={(e) => setPrice(e.target.value)} />
+              <span className="hint">{t("item.priceSameHint")}</span>
+            </div>
+            <SizePicker
+              counts={sizeCounts}
+              onCounts={setSizeCounts}
+              custom={customSizes}
+              onCustom={setCustomSizes}
+              one={oneCount}
+              onOne={setOneCount}
+              taken={items.filter((i) => sameName(i.name, name) && i.variant).map((i) => i.variant)}
+            />
+          </>
+        )}
         <PhotosField label={t("item.photos")} photos={shownPhotos} onChange={setPhotos} hint={t("item.photosHint")} />
         <PaySection idPrefix="f" qrUrl={qr?.url ?? null} onQr={setQr} payUrl={payUrl} onPayUrl={setPayUrl} cardPay={cardPay} onCardPay={setCardPay} qrHint={t("item.qrHint")} />
         {item && siblings.length > 0 && (

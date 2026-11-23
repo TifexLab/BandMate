@@ -37,6 +37,12 @@ export default function Sell() {
     });
   };
 
+  // Takes one piece back out of the basket (the line disappears at zero).
+  const removeOne = (it: Item) =>
+    setBasket((b) =>
+      b.flatMap((l) => (l.kind === "item" && l.refId === it.id ? (l.qty <= 1 ? [] : [{ ...l, qty: l.qty - 1, picks: [{ itemId: it.id, qty: l.qty - 1 }] }]) : [l]))
+    );
+
   const groupAvail = (name: string) => items.filter((i) => gkey(i.name) === gkey(name)).reduce((t, i) => t + Math.max(0, avail(i.id)), 0);
   const bundleOk = (b: Bundle) => b.parts.length > 0 && b.parts.every((p) => groupAvail(p.name) >= (p.qty || 1));
 
@@ -72,18 +78,28 @@ export default function Sell() {
                 <span className="tag">{priceTag(g.items, cur)}</span>
               </div>
               {single ? (
-                <button className={`btn block ${avail(g.items[0].id) > 0 ? "primary" : ""}`} disabled={avail(g.items[0].id) <= 0} onClick={() => add(g.items[0])}>
-                  {avail(g.items[0].id) > 0 ? t("sell.addToBasket") : (stock[g.items[0].id] ?? 0) > 0 ? t("sell.allInBasket") : t("sell.soldOut")}
-                  {inBasket[g.items[0].id] ? <span className="num"> ({inBasket[g.items[0].id]})</span> : null}
-                </button>
+                <div className="addrow">
+                  <button className={`btn block ${avail(g.items[0].id) > 0 ? "primary" : ""}`} disabled={avail(g.items[0].id) <= 0} onClick={() => add(g.items[0])}>
+                    {avail(g.items[0].id) > 0 ? t("sell.addToBasket") : (stock[g.items[0].id] ?? 0) > 0 ? t("sell.allInBasket") : t("sell.soldOut")}
+                    {inBasket[g.items[0].id] ? <span className="num"> ({inBasket[g.items[0].id]})</span> : null}
+                  </button>
+                  {inBasket[g.items[0].id] ? (
+                    <button className="minus" onClick={() => removeOne(g.items[0])} aria-label={t("sell.removeOneAria", { label: itemLabel(g.items[0]) })}>−</button>
+                  ) : null}
+                </div>
               ) : (
                 <div className="sizes">
                   {g.items.map((it) => (
-                    <button key={it.id} className="chip" disabled={avail(it.id) <= 0} onClick={() => add(it)} aria-label={t("sell.chipAria", { label: itemLabel(it), n: Math.max(0, stock[it.id] ?? 0) })}>
-                      <b>{it.variant || t("common.oneSize")}</b>
-                      <small className="num">{t("sell.left", { n: Math.max(0, stock[it.id] ?? 0) })}</small>
-                      {inBasket[it.id] ? <span className="badge num">{inBasket[it.id]}</span> : null}
-                    </button>
+                    <div className="chipwrap" key={it.id}>
+                      <button className="chip" disabled={avail(it.id) <= 0} onClick={() => add(it)} aria-label={t("sell.chipAria", { label: itemLabel(it), n: Math.max(0, stock[it.id] ?? 0) })}>
+                        <b>{it.variant || t("common.oneSize")}</b>
+                        <small className="num">{t("sell.left", { n: Math.max(0, stock[it.id] ?? 0) })}</small>
+                        {inBasket[it.id] ? <span className="badge num">{inBasket[it.id]}</span> : null}
+                      </button>
+                      {inBasket[it.id] ? (
+                        <button className="minus" onClick={() => removeOne(it)} aria-label={t("sell.removeOneAria", { label: itemLabel(it) })}>−</button>
+                      ) : null}
+                    </div>
                   ))}
                 </div>
               )}

@@ -489,3 +489,21 @@ input[type="range"] { width: 100%; accent-color: var(--primary); }
 
 /* ---- Settings: delete-this-band card ---- */
 .danger-zone { border: 1.5px solid color-mix(in srgb, var(--out) 55%, var(--surface)); }
+
+/* ---- size cells in the new-product form ---- */
+.sizecols { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start; }
+.sizecol { display: flex; flex-direction: column; gap: 6px; min-width: 56px; }
+.sizecell { min-height: 46px; min-width: 56px; padding: 0 12px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--sunk); color: var(--text); font-family: var(--f-display); font-weight: 800; font-size: 1.02rem; cursor: pointer; }
+.sizecell.sel { border-color: var(--primary); background: var(--primary-soft); }
+.sizecell:disabled { opacity: .4; text-decoration: line-through; cursor: not-allowed; }
+.sizecell.plus { border-style: dashed; }
+/* width needs !important: the generic `.field input:not(...)` rule above is far more specific and would stretch the box to the column */
+.sizepick .sizecount { width: 56px !important; min-width: 0; align-self: center; text-align: center; padding-left: 4px; padding-right: 4px; }
+.sizeadd { margin-top: 2px; }
+
+/* ---- the "−" that takes one piece out of the basket on the Sell tab ---- */
+.chipwrap { display: flex; gap: 4px; align-items: stretch; }
+.addrow { display: flex; gap: 8px; align-items: stretch; }
+.addrow .btn { flex: 1; }
+.minus { min-width: 46px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--sunk); color: var(--text); font-size: 1.5rem; font-weight: 800; line-height: 1; cursor: pointer; }
+.minus:active { transform: scale(.94); }

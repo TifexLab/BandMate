@@ -86,14 +86,13 @@ export function setStockCount(itemId: string, qty: number) {
 
 export function createItems(
   base: { name: string; price: number; qrUrl: string | null; qrPath: string | null; payUrl: string | null; cardPay: boolean; visible: boolean; images: Photo[] },
-  variants: string[],
-  qty: number,
+  sizes: { variant: string; qty: number }[],
   orderStart: number
 ) {
-  const list = variants.length ? variants : [""];
+  const list = sizes.length ? sizes : [{ variant: "", qty: 0 }];
   assertItemRoom(list.length); // the plan's item limit; the same limit is enforced by firestore.rules
   const b = writeBatch(db);
-  list.forEach((variant, i) => {
+  list.forEach(({ variant, qty }, i) => {
     const ref = doc(bandCol("items"));
     b.set(ref, { ...base, variant, soldOut: qty <= 0, order: orderStart + i });
     b.set(bandDoc("stock", ref.id), { qty });

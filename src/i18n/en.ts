@@ -527,7 +527,7 @@ export const en = {
   "help.start.b4": "It keeps working without a signal. Sales and stock changes are saved on the phone and sync when you are back online.",
   "help.stock.title": "Stock: adding items",
   "help.stock.lead": "Stock is the list of everything you sell, with photos, price, a payment QR and how many pieces you have.",
-  "help.stock.b1": "Tap Add item. Use the same name for every size so they group together, and type sizes separated by commas (S, M, L) to create them all at once.",
+  "help.stock.b1": "Tap Add item. Tap the sizes you are adding (XS to 3XL, or + for your own) and type how many pieces of each under it. No sizes, like a cup? Leave them off and type one number.",
   "help.stock.b2": "Add up to 6 photos per product. The first one is the main photo. All sizes of one product share the same photos.",
   "help.stock.b3": "Use the + button on a row to add pieces, or type the exact number to correct the count. Sold 1 sells one piece. The back arrow next to it puts the last sold piece back in stock, any time.",
   "help.stock.b4": "Switch off the fan-page option to hide an item. Hidden items stay in stock and can still be sold at the table.",
@@ -612,6 +612,16 @@ export const en = {
   "mydel.failed": "Couldn't finish deleting. Try again; what is already deleted stays deleted.",
   "start.alreadyFix": "Made a typo in the address? Open Settings in your band, use Delete this band, and register again.",
   "help.account.b4": "A typo in the band's address? The name can be changed in Settings → Band, but the address can't. Admins can delete the band in Settings (Delete this band) and register a new one. Everything in the band is erased for good.",
+  "item.sizes": "Sizes",
+  "item.sizesHint": "Tap the sizes you are adding to stock and type how many pieces of each under it. Use + for your own size.",
+  "item.sizeAdd": "Add your own size",
+  "item.sizeAddPh": "e.g. Kids",
+  "item.sizeAddGo": "Add",
+  "item.piecesOf": "Pieces of size {size}",
+  "item.sizeTaken": "This size is already in stock. Add pieces with + pcs.",
+  "item.noSizeHint": "No sizes switched on: one number for the whole product (a cup, a cap). Tap a size above if it has sizes.",
+  "item.priceSameHint": "One price for every size. For a different price (say women's M), add it as a separate product.",
+  "sell.removeOneAria": "Take one {label} out of the basket",
 } as const;
 
 export type Key = keyof typeof en;
