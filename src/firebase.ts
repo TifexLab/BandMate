@@ -28,6 +28,9 @@ export const auth = getAuth(app);
 // sales are saved on the phone and sync when the connection returns.
 export const db = initializeFirestore(app, {
   localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
+  // Some networks and phones let the normal streaming connection hang without ever failing (the app then sits on "loading").
+  // This lets the SDK notice that and switch to plain long-polling by itself.
+  experimentalAutoDetectLongPolling: true,
 });
 
 export const storage = getStorage(app);

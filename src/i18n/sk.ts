@@ -624,4 +624,7 @@ export const sk: Record<Key, string> = {
   "item.noSizeHint": "Žiadna veľkosť nie je zapnutá: jedno číslo pre celý produkt (hrnček, šiltovka). Ak má veľkosti, klepni na niektorú vyššie.",
   "item.priceSameHint": "Jedna cena pre všetky veľkosti. Pre inú cenu (napríklad dámske M) pridaj samostatný produkt.",
   "sell.removeOneAria": "Vybrať z košíka jeden kus {label}",
+  "loading.slow": "Trvá to dlhšie než zvyčajne. Skontroluj pripojenie a načítaj stránku znova. Ak sa to na tomto zariadení opakuje, vymaž jeho uložené dáta (zostaneš prihlásený).",
+  "loading.reload": "Načítať znova",
+  "loading.reset": "Vymazať uložené dáta v tomto zariadení a načítať",
 };

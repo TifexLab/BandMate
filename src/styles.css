@@ -507,3 +507,5 @@ input[type="range"] { width: 100%; accent-color: var(--primary); }
 .addrow .btn { flex: 1; }
 .minus { min-width: 46px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--sunk); color: var(--text); font-size: 1.5rem; font-weight: 800; line-height: 1; cursor: pointer; }
 .minus:active { transform: scale(.94); }
+
+.slowload { margin-top: 12px; align-items: stretch; }

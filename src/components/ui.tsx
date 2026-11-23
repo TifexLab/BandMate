@@ -270,11 +270,42 @@ export function ConfirmButton({ children, confirmText, onConfirm, className = "b
   );
 }
 
+/** Deletes the data this browser keeps for the app's database (Firestore's offline cache). The login and the language stay.
+ *  A stuck or damaged cache on one device is the usual reason an app sits on "loading" forever there. */
+async function clearSavedData() {
+  try {
+    const dbs = (await indexedDB.databases?.()) ?? [];
+    await Promise.race([
+      Promise.all(dbs.filter((d) => d.name && d.name.startsWith("firestore/")).map((d) => new Promise<void>((res) => {
+        const r = indexedDB.deleteDatabase(d.name!);
+        r.onsuccess = r.onerror = r.onblocked = () => res();
+      }))),
+      new Promise((res) => setTimeout(res, 2000)),
+    ]);
+  } catch {
+    /* nothing to clear, or not allowed: reloading is still worth a try */
+  }
+  window.location.reload();
+}
+
+/** "Opening…" with a safety net: if it takes more than a few seconds, say so and offer a reload and a reset of this device's saved data. */
 export function Loading({ text }: { text?: string }) {
   const t = useT();
+  const [slow, setSlow] = useState(false);
+  useEffect(() => {
+    const timer = setTimeout(() => setSlow(true), 12000);
+    return () => clearTimeout(timer);
+  }, []);
   return (
     <div className="empty">
       <h3>{text ?? t("common.loading")}</h3>
+      {slow && (
+        <div className="stack-sm slowload">
+          <p className="note">{t("loading.slow")}</p>
+          <button className="btn primary" onClick={() => window.location.reload()}>{t("loading.reload")}</button>
+          <button className="btn ghost" onClick={clearSavedData}>{t("loading.reset")}</button>
+        </div>
+      )}
     </div>
   );
 }

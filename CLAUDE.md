@@ -170,6 +170,14 @@ Accounts made by the scripts are marked verified. Unverified Auth accounts stay 
 - Translation keys are global: check `grep '"key"' src/i18n/en.ts` before adding one. Reusing `pay.card` ("Card", the payment-method name in Sell and
   Sales) for the Stripe tick once showed the wrong label in production; the Stripe tick is `pay.stripe`.
 
+## "Stuck on loading" (seen on a real iPhone)
+Symptom: the "Otváram krabicu s merchom…" card never goes away. It does NOT reproduce when the database is unreachable (the app then shows
+"band not found"); it happens when the connection just hangs (no answer, no error), or the device's offline cache is damaged. Safety nets: `Loading`
+(`components/ui.tsx`) shows, after 12 s, a "taking long" note with Reload and "Clear saved data on this device" (deletes only the `firestore/*`
+IndexedDB, login and language stay), and `src/firebase.ts` sets `experimentalAutoDetectLongPolling: true`. Local reproduction: Playwright
+`page.route("**://127.0.0.1:8080/**", () => {})` (a handler that never continues). To test a band's own address locally, map the host with
+`--host-resolver-rules` and run Vite with `server.allowedHosts: true` (Vite rejects unknown hostnames).
+
 ## Help (in-app manual)
 `src/components/Help.tsx`, shown in Settings under the plan card: expandable topics (one open at a time, `.acc*` styles in `styles.css`).
 Texts are `help.<id>.title/.lead/.b1…bN` in both `en.ts` and `sk.ts`. To add or change a topic edit `TOPICS` in the component (bullet count)

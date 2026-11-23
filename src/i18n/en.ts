@@ -622,6 +622,9 @@ export const en = {
   "item.noSizeHint": "No sizes switched on: one number for the whole product (a cup, a cap). Tap a size above if it has sizes.",
   "item.priceSameHint": "One price for every size. For a different price (say women's M), add it as a separate product.",
   "sell.removeOneAria": "Take one {label} out of the basket",
+  "loading.slow": "This is taking longer than usual. Check your connection and reload. If it keeps happening on this device, clear its saved data (you stay signed in).",
+  "loading.reload": "Reload",
+  "loading.reset": "Clear saved data on this device and reload",
 } as const;
 
 export type Key = keyof typeof en;
