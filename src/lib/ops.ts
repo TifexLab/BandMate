@@ -70,6 +70,13 @@ export function setSaleUndone(sale: Pick<Sale, "id" | "lines">, undone: boolean,
   return b.commit();
 }
 
+/** Permanently remove cancelled sales (stock was already put back when they were cancelled). Admin only. */
+export function deleteCancelledSales(ids: string[]) {
+  const b = writeBatch(db);
+  ids.forEach((id) => b.delete(bandDoc("sales", id)));
+  return b.commit();
+}
+
 export function addStock(itemId: string, delta: number, current: number) {
   const b = writeBatch(db);
   b.set(bandDoc("stock", itemId), { qty: increment(delta) }, { merge: true });

@@ -4,7 +4,7 @@ import { useSettings } from "../../state/settings";
 import { useAuth } from "../../state/auth";
 import { useToast } from "../../state/toast";
 import { errorText, itemLabel, money, timeLabel } from "../../lib/format";
-import { setSaleUndone } from "../../lib/ops";
+import { deleteCancelledSales, setSaleUndone } from "../../lib/ops";
 import { useT, type Key } from "../../i18n";
 
 const METHOD: Record<string, Key> = { qr: "pay.qr", cash: "pay.cash", card: "pay.card", quick: "pay.quick" };
@@ -39,6 +39,14 @@ export default function Sales() {
     toast(undone ? tt("sales.toastCancelled") : tt("sales.toastRestored"));
   };
 
+  const isAdmin = profile?.role === "admin";
+  const cancelled = list.filter((s) => s.undone);
+  const remove = (ids: string[], msg: string) => {
+    if (!window.confirm(msg)) return;
+    deleteCancelledSales(ids).catch((e) => toast(errorText(e)));
+    toast(tt("sales.toastDeleted"));
+  };
+
   return (
     <>
       <div className="toolbar center-y">
@@ -69,6 +77,11 @@ export default function Sales() {
           )}
         </div>
       )}
+      {isAdmin && cancelled.length > 0 && (
+        <button className="btn sm ghost" onClick={() => remove(cancelled.map((s) => s.id), tt("sales.confirmClear", { n: cancelled.length }))}>
+          {tt("sales.clearCancelled", { n: cancelled.length })}
+        </button>
+      )}
       {!list.length ? (
         <div className="empty">
           <h3>{tt("sales.emptyTitle")}</h3>
@@ -96,6 +109,9 @@ export default function Sales() {
               {s.undone && <span>{tt("sales.cancelled")}</span>}
             </div>
             <button className="btn sm ghost" onClick={() => toggle(s.id, !s.undone)}>{s.undone ? tt("sales.restore") : tt("sales.undo")}</button>
+            {isAdmin && s.undone && (
+              <button className="btn sm ghost" onClick={() => remove([s.id], tt("sales.confirmDelete"))}>{tt("sales.delete")}</button>
+            )}
           </div>
         ))
       )}
