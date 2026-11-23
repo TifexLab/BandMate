@@ -311,8 +311,8 @@ input[type="range"] { width: 100%; accent-color: var(--primary); }
 .carousel { position: relative; margin: -14px -14px 0; background: var(--sunk); }
 .car-track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; }
 .car-track::-webkit-scrollbar { display: none; }
-.car-slide { flex: 0 0 100%; scroll-snap-align: center; scroll-snap-stop: always; aspect-ratio: 4 / 5; border: 0; padding: 0; margin: 0; background: none; cursor: zoom-in; }
-.car-slide img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.car-slide { flex: 0 0 100%; scroll-snap-align: center; scroll-snap-stop: always; aspect-ratio: 4 / 5; max-height: 70vh; border: 0; padding: 0; margin: 0; background: none; cursor: zoom-in; }
+.car-slide img { width: 100%; height: 100%; object-fit: contain; display: block; }
 .car-dots { position: absolute; left: 0; right: 0; bottom: 10px; display: flex; justify-content: center; gap: 6px; pointer-events: none; }
 .car-dots i { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,.55); box-shadow: 0 0 0 1px rgba(0,0,0,.25); }
 .car-dots i.on { background: #fff; transform: scale(1.25); }
