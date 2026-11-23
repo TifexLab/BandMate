@@ -38,7 +38,7 @@ export default function Bundles() {
                 <span className="tag">{money(b.price, settings.currency)}</span>
               </div>
               <div className="meta-row">
-                {b.qrUrl ? <img className="mini-qr" src={b.qrUrl} alt="" /> : null}
+                {b.images?.[0]?.url ? <img className="mini-photo" src={b.images[0].url} alt="" /> : b.qrUrl ? <img className="mini-qr" src={b.qrUrl} alt="" /> : null}
                 <span className="note">{b.qrUrl ? t("bundles.qrAttached") : t("bundles.noQr")}</span>
                 {!b.visible && <span className="hidden-tag">{Icon.eyeOff} {t("bundles.hiddenFromFans")}</span>}
               </div>

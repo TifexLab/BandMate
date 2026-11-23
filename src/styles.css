@@ -206,6 +206,7 @@ h2.sec {
   .row-act { grid-column: 2 / -1; }
 }
 .meta-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.mini-photo { width: 56px; height: 56px; border-radius: 6px; background: var(--sunk); object-fit: cover; }
 .mini-qr { width: 40px; height: 40px; border-radius: 4px; background: #fff; object-fit: contain; }
 
 .empty {
