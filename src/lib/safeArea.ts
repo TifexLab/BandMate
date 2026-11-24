@@ -1,13 +1,11 @@
 // iPhone / iPad apps added to the home screen are fussy about the window size:
 //  1. env(safe-area-inset-*) can be 0 -> we set a fallback (--sa-top / --sa-bottom, read in styles.css; the larger of env() and the fallback wins).
 //  2. After opening or resuming, the layout viewport can be shorter than the screen (by the status-bar height). Fixed elements (the bottom menu) then end
-//     ~60px above the screen bottom and are clipped there. Rotating the phone makes iOS recompute it, so we try the same by toggling the viewport meta,
-//     and meanwhile mark <html class="vp-short"> (a compact look, see styles.css). The state is re-checked every second because iOS often changes it
-//     without any event, which used to leave the compact look on after the window had already been fixed.
-let healTries = 0;
-let healing = false;
+//     ~60px above the screen bottom and are clipped there. We mark <html class="vp-short"> (a compact look, see styles.css) and re-check every second,
+//     because iOS often changes it without any event (rotating the phone makes iOS recompute it). DO NOT try to "fix" the window by toggling the viewport
+//     meta: that made the layout flip back and forth in a loop (strobing header and menu).
 let lastKey = "";
-let originalViewport: string | null = null; // the viewport meta as shipped, captured once
+let pendingKey = ""; // a change is applied only after it was measured twice in a row, so a flickering reading can never make the layout flip
 
 const isStandaloneIPhoneOrIPad = () => {
   const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
@@ -26,23 +24,7 @@ function viewportGap(): number {
   return gap >= 20 && gap <= 100 ? gap : 0;
 }
 
-/** Make iOS lay the window out again (what rotating the phone does) by briefly dropping viewport-fit from the viewport meta. */
-function heal() {
-  if (healing || healTries >= 4 || document.hidden) return;
-  const meta = document.querySelector('meta[name="viewport"]');
-  if (!meta) return;
-  if (originalViewport === null) originalViewport = meta.getAttribute("content") || "";
-  healing = true;
-  healTries++;
-  meta.setAttribute("content", originalViewport.replace(/,?\s*viewport-fit=cover/, ""));
-  requestAnimationFrame(() => requestAnimationFrame(() => {
-    meta.setAttribute("content", originalViewport as string);
-    healing = false;
-    setTimeout(apply, 150);
-  }));
-}
-
-function apply() {
+function apply(immediate = false) {
   const root = document.documentElement;
   if (!document.body) return;
   let top = 0, bottom = 0, gap = 0;
@@ -63,23 +45,23 @@ function apply() {
     gap = viewportGap();
   }
   const key = `${top}/${bottom}/${gap}`;
-  if (key !== lastKey) { // only touch the page when something actually changed
+  if (key !== lastKey) { // only touch the page when something actually changed (and was measured twice in a row)
+    if (!immediate && key !== pendingKey) { pendingKey = key; return; }
+    pendingKey = "";
     lastKey = key;
     top ? root.style.setProperty("--sa-top", `${top}px`) : root.style.removeProperty("--sa-top");
     bottom ? root.style.setProperty("--sa-bottom", `${bottom}px`) : root.style.removeProperty("--sa-bottom");
     gap ? root.style.setProperty("--vp-gap", `${gap}px`) : root.style.removeProperty("--vp-gap");
     root.classList.toggle("vp-short", gap > 0);
   }
-  if (gap > 0) heal(); // a few tries per launch / resume
-  else healTries = 0;
 }
 
 export function initSafeArea() {
-  apply();
-  window.addEventListener("resize", apply);
-  window.addEventListener("orientationchange", () => { healTries = 0; setTimeout(apply, 100); });
-  window.addEventListener("pageshow", () => { healTries = 0; apply(); });
-  window.addEventListener("focus", apply);
-  document.addEventListener("visibilitychange", () => { if (!document.hidden) { healTries = 0; apply(); setTimeout(apply, 400); } });
-  if (isStandaloneIPhoneOrIPad()) setInterval(apply, 1000);
+  apply(true);
+  window.addEventListener("resize", () => apply());
+  window.addEventListener("orientationchange", () => { setTimeout(() => apply(), 100); });
+  window.addEventListener("pageshow", () => { apply(); apply(); });
+  window.addEventListener("focus", () => apply());
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) { apply(); setTimeout(() => apply(), 400); } });
+  if (isStandaloneIPhoneOrIPad()) setInterval(() => apply(), 1000);
 }
