@@ -12,6 +12,7 @@ import LangSwitch from "./components/LangSwitch";
 import { ToastProvider } from "./state/toast";
 import TenantGate from "./components/TenantGate";
 import { Loading } from "./components/ui";
+import DiagPage from "./pages/DiagPage";
 import TicketPage from "./pages/TicketPage";
 import TicketsListPage from "./pages/TicketsListPage";
 import PublicPage from "./pages/PublicPage";
@@ -93,6 +94,7 @@ function BandRoutes() {
   return (
     <Routes>
       <Route path="/" element={<PublicPage />} />
+      <Route path="/diag" element={<DiagPage />} />
       <Route path="/listky" element={<TicketsListPage />} />
       <Route path="/listok/:ticketId" element={<TicketPage />} />
       <Route path="/login" element={<Login />} />
@@ -114,6 +116,7 @@ function PlatformApp() {
               <Route path="/start" element={<StartPage />} />
               <Route path="/start/login" element={<Login variant="customer" />} />
               <Route path="/start/register" element={<Navigate to="/start" replace />} />
+              <Route path="/diag" element={<DiagPage />} />
               <Route path="/terms" element={<TermsPage />} />
               <Route path="/platform/login" element={<Login variant="operator" />} />
               <Route path="/platform" element={<PlatformConsole />} />

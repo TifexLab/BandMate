@@ -547,3 +547,6 @@ input[type="range"] { width: 100%; accent-color: var(--primary); }
 .concert-cell::after { content: ""; position: absolute; inset: -9px -6px; } /* keeps a finger-sized tap area */
 .backbar { max-width: var(--maxw); margin: 0 auto; padding: calc(8px + var(--safe-top)) 14px 0; }
 .backbtn { min-height: 44px; padding: 0 12px 0 4px; background: none; border: 0; color: var(--text); font: inherit; font-weight: 700; cursor: pointer; }
+.diag-top, .diag-bottom { position: fixed; left: 0; right: 0; height: 14px; z-index: 40; pointer-events: none; }
+.diag-top { top: 0; background: #e5484d; }
+.diag-bottom { bottom: 0; background: #3e63dd; }

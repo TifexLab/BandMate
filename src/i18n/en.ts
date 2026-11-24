@@ -207,6 +207,8 @@ export const en = {
   "tk.concerts": "Concerts and tickets",
   "tk.concertsCount": "{n} upcoming events",
   "tk.noUpcoming": "No upcoming events.",
+  "diag.title": "Screen check",
+  "diag.hint": "Take a screenshot of this page and send it. A red strip should sit at the very top and a blue strip at the very bottom of the screen.",
   "tab.sales": "Sales",
   "tab.settings": "Settings",
   "tab.people": "People",
