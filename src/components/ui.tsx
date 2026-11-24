@@ -60,7 +60,7 @@ export function Sheet({ title, onClose, children }: { title: string; onClose: ()
 }
 
 /** What a fan sees after tapping a product: how to pay (bank link, QR, card later), in the app's own style. */
-export function QrPopup({ src, title, sub, payUrl, cardPay, onClose }: { src: string | null; title: string; sub?: string; payUrl?: string | null; cardPay?: boolean; onClose: () => void }) {
+export function QrPopup({ src, title, sub, payUrl, cardPay, code, codeMail, onClose }: { src: string | null; title: string; sub?: string; payUrl?: string | null; cardPay?: boolean; code?: string | null; codeMail?: string; onClose: () => void }) {
   const t = useT();
   const link = payUrl ? cleanPayUrl(payUrl) : "";
   const canPayHere = !!(link || src || cardPay);
@@ -93,7 +93,19 @@ export function QrPopup({ src, title, sub, payUrl, cardPay, onClose }: { src: st
               </div>
             )}
           </div>
-          <p className="notice">{t("qr.verifyAtTable")}</p>
+          {code && (
+            <div className="paycode">
+              <span className="label">{t("tk.yourCode")}</span>
+              <b className="mono">{code}</b>
+              <p className="note">{t("tk.codeInstr")}</p>
+              <div className="actions">
+                <button type="button" className="btn ghost sm" onClick={() => navigator.clipboard?.writeText(code)}>{t("tk.copyCode")}</button>
+                {codeMail && <a className="btn ghost sm" href={codeMail}>{t("tk.mailCode")}</a>}
+              </div>
+              <p className="hint">{t("tk.screenshot")}</p>
+            </div>
+          )}
+          {!code && <p className="notice">{t("qr.verifyAtTable")}</p>}
         </>
       ) : (
         <p className="note">{t("qr.payAtTable")}</p>

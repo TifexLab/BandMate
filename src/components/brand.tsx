@@ -15,7 +15,7 @@ export function normaliseUrl(u: string) {
   return /^[a-z][a-z0-9+.-]*:/i.test(t) ? t : `https://${t}`;
 }
 
-function useQr(text: string) {
+export function useQr(text: string) {
   const [src, setSrc] = useState<string | null>(null);
   useEffect(() => {
     if (!text) return setSrc(null);

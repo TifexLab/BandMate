@@ -84,6 +84,19 @@ email/password, Firestore, Storage), hosted on Vercel, code on GitHub. Setup ste
   the card also keeps name/logo in step with `settings/public`. A paused band stays listed but its page shows "Temporarily closed".
   `deleteOwnBand`/`deleteBand` remove the entry. The whole list is fetched once and filtered in the browser (fine up to a few thousand bands).
 
+## Tickets (shareable ticket link / QR, payment by the band's own bank)
+- Tab "Tickets" (`pages/band/Tickets.tsx`, logic `lib/tickets.ts`). `tickets/{id}`: name, place, startDate, endDate, time, price, `max` (null = unlimited),
+  `paidCount` (public: tickets the band marked paid; fans see "sold out" when it reaches `max`), `prefix` (e.g. `Sawdust-may5`, default from band name + first
+  day, editable), qrUrl/payUrl/cardPay (same `PaySection` as merch; Stripe stays greyed), visible. Public if visible; the merch page lists upcoming ones.
+- Fan link/QR = `<band address>/listok/<ticketId>` (`pages/TicketPage.tsx`). Opening a payment option (`issueCode`) creates `tickets/{id}/codes/{code lowercase}`
+  `{code, qty, createdAt, paid:false, usedDays:[]}` and shows the code under the QR/link (`QrPopup` `code` prop) to write into the bank's message for the recipient,
+  with copy, "send to my email" (mailto) and a screenshot tip. Same device + same quantity reuses the code (localStorage). Code = `prefix-` + 6 chars (no 0/O/1/I).
+- BandMate can NOT verify the payment. At the door staff search the code, check the bank, tap "Used": `usedDays` gets today (once per day; a second try shows a
+  warning) and, if not yet paid, `markPaid` records a Sale (method qr, line kind "ticket", no stock picks) and `paidCount += qty` in one batch. Mark paid / unpaid /
+  delete code exist too. Fans may only CREATE a code doc (rules check shape, prefix, qty 1..20, unpaid, unused; refusing an existing id is the collision retry);
+  they can never read/list/change codes. Codes are deleted when an event is over (`cleanupEnded`, run when a band member opens Tickets, no server job; sales stay).
+  Deleting a band also deletes tickets and codes. Real per-buyer entry QR codes after a verified Stripe payment come later (needs Stripe + server).
+
 ## Roles (source of truth: `firestore.rules`, `storage.rules`; tests in `tests/rules.test.mjs`)
 Roles live in `bands/{bandId}/members/{uid}.role`:
 - Fan (not signed in): reads one active band's `items`/`bundles` where `visible == true`, and `settings/public`. Never stock or sales.

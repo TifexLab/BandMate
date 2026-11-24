@@ -523,3 +523,14 @@ input[type="range"] { width: 100%; accent-color: var(--primary); }
 .stocknote { display: block; font-size: .75rem; color: var(--muted); }
 .stocknote.low { color: var(--primary); font-weight: 800; }
 .chip .stocknote { margin-top: 1px; }
+
+.tcode { border: 1px solid var(--line); border-radius: var(--r); padding: 10px 12px; margin-top: 10px; display: grid; gap: 6px; }
+.tcode.used { border-color: var(--out); }
+.tcode-main { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; align-items: baseline; }
+.tcode-meta { display: flex; flex-wrap: wrap; gap: 6px; }
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: .02em; overflow-wrap: anywhere; }
+.mpill.off { opacity: .6; }
+.paycode { margin-top: 14px; padding: 12px; border: 2px dashed var(--primary); border-radius: var(--r); display: grid; gap: 6px; text-align: center; }
+.paycode .mono { font-size: 1.35rem; font-weight: 800; user-select: all; }
+.paycode .actions { justify-content: center; }
+.tag.big { font-size: 1.2rem; display: inline-block; margin: 6px 0 10px; }

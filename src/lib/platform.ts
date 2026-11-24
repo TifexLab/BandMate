@@ -118,12 +118,20 @@ async function deleteStorageFolder(path: string) {
   for (const p of res.prefixes) await deleteStorageFolder(p.fullPath);
 }
 
+/** Tickets and their payment codes (codes are a sub-collection, so they go first). */
+async function deleteTickets(bandId: string) {
+  const tickets = await getDocs(collection(db, "bands", bandId, "tickets"));
+  for (const t of tickets.docs) await deleteAllIn(collection(db, "bands", bandId, "tickets", t.id, "codes"));
+  await deleteAllIn(collection(db, "bands", bandId, "tickets"));
+}
+
 /** A band's own admin erases their band (data, pictures, people) and their registration request, so they can register again,
  *  e.g. after a typo in the address. The security rules allow the last few documents to go only in the final batch, together with
  *  the band itself. Their login stays. Irreversible. */
 export async function deleteOwnBand(bandId: string, uid: string) {
   await unlistFromDirectory(bandId).catch(() => {}); // first: it needs their admin membership
   await deleteStorageFolder(`bands/${bandId}`); // needs their membership too
+  await deleteTickets(bandId);
   for (const sub of ["sales", "items", "stock", "bundles", "invites"]) await deleteAllIn(collection(db, "bands", bandId, sub));
   const members = await getDocs(collection(db, "bands", bandId, "members"));
   await Promise.all(members.docs.filter((d) => d.id !== uid).map((d) => deleteDoc(d.ref)));
@@ -141,6 +149,7 @@ export async function deleteOwnBand(bandId: string, uid: string) {
 export async function deleteBand(bandId: string) {
   await setBandStatus(bandId, "paused"); // closes the store for fans while it is being emptied
   await unlistFromDirectory(bandId).catch(() => {});
+  await deleteTickets(bandId);
   for (const sub of ["sales", "items", "stock", "bundles", "members", "invites"]) await deleteAllIn(collection(db, "bands", bandId, sub));
   for (const id of ["public", "band", "usage"]) await deleteDoc(doc(db, "bands", bandId, "settings", id));
   await deleteStorageFolder(`bands/${bandId}`);

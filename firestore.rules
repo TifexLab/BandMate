@@ -142,6 +142,27 @@ service cloud.firestore {
         allow create: if isStaff() && getAfter(usageRef()).data.get('items', 0) <= maxItems();
         allow update, delete: if isStaff();
       }
+      // Ticketed events. Public if visible. Only staff change them. A fan creates a payment code (never reads or changes anyone's):
+      // doc id = the code in lowercase, starting with the event's prefix, unpaid, unused.
+      match /tickets/{ticketId} {
+        allow read: if (resource.data.visible == true && active()) || isStaff();
+        allow write: if isStaff();
+        match /codes/{codeId} {
+          allow read, update, delete: if isStaff();
+          allow create: if isStaff() || (active()
+            && get(/databases/$(database)/documents/bands/$(bandId)/tickets/$(ticketId)).data.visible == true
+            && request.resource.data.keys().hasOnly(['code', 'qty', 'createdAt', 'paid', 'usedDays'])
+            && request.resource.data.code is string
+            && request.resource.data.code.lower() == codeId
+            && request.resource.data.code.size() <= 48
+            && codeId[0:get(/databases/$(database)/documents/bands/$(bandId)/tickets/$(ticketId)).data.prefix.size()]
+              == get(/databases/$(database)/documents/bands/$(bandId)/tickets/$(ticketId)).data.prefix.lower()
+            && request.resource.data.qty is int && request.resource.data.qty >= 1 && request.resource.data.qty <= 20
+            && request.resource.data.createdAt is number
+            && request.resource.data.paid == false
+            && request.resource.data.usedDays.size() == 0);
+        }
+      }
       match /bundles/{id} {
         allow read: if (resource.data.visible == true && active()) || isStaff();
         allow write: if isStaff();

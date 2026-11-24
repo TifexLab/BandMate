@@ -11,7 +11,8 @@ import { useT } from "../i18n";
 import LangSwitch from "../components/LangSwitch";
 import { LogoBackdrop, TopBar } from "../components/brand";
 import { Loading, PhotoCarousel, PhotoViewer, QrPopup } from "../components/ui";
-import type { Bundle, Item, Photo } from "../types";
+import { isEnded } from "../lib/tickets";
+import type { Bundle, Item, Photo, Ticket } from "../types";
 
 /** What fans see: products, prices and payment QR codes. Never stock counts. */
 export default function PublicPage() {
@@ -23,6 +24,8 @@ export default function PublicPage() {
   const { bandId } = useTenant();
   const items = useLiveQuery<Item>(() => query(bandCol("items"), where("visible", "==", true)), `pub-items-${bandId}`);
   const bundles = useLiveQuery<Bundle>(() => query(bandCol("bundles"), where("visible", "==", true)), `pub-bundles-${bandId}`);
+  const tickets = useLiveQuery<Ticket>(() => query(bandCol("tickets"), where("visible", "==", true)), `pub-tickets-${bandId}`);
+  const upcomingTickets = tickets.data.filter((x) => !isEnded(x)).sort((a, b) => a.startDate.localeCompare(b.startDate));
   const [qr, setQr] = useState<{ src: string | null; title: string; sub: string; payUrl?: string | null; cardPay?: boolean } | null>(null);
   const [viewer, setViewer] = useState<{ photos: Photo[]; start: number; title: string } | null>(null);
   const cur = settings.currency;
@@ -47,6 +50,26 @@ export default function PublicPage() {
       </header>
       <main className="page">
         <div className="wrap">
+          {upcomingTickets.length > 0 && (
+            <>
+              <h2 className="sec">{t("tk.fanSection")}</h2>
+              <div className="grid">
+                {upcomingTickets.map((x) => (
+                  <article className="tile" key={x.id}>
+                    <div className="tile-top">
+                      <div>
+                        <h3>{x.name}</h3>
+                        <div className="sub">{x.startDate.split("-").reverse().map(Number).join(".")}{x.time ? ` · ${x.time}` : ""}{x.place ? ` · ${x.place}` : ""}</div>
+                      </div>
+                      <span className="tag">{money(x.price, cur)}</span>
+                    </div>
+                    <Link className="btn primary block" to={`/listok/${x.id}`}>{t("tk.fanBuy")}</Link>
+                  </article>
+                ))}
+              </div>
+              <h2 className="sec">{t("tk.fanMerch")}</h2>
+            </>
+          )}
           {!items.ready ? (
             <Loading text={t("fan.loading")} />
           ) : !groups.length && !bundleList.length ? (

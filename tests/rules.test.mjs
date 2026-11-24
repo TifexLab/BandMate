@@ -510,3 +510,49 @@ test("directory: anyone reads it; only that band's own admin (or the operator) l
   await assertSucceeds(deleteDoc(doc(as(ids.adminA), "directory", "a")));
   await assertSucceeds(setDoc(doc(as(ids.platform), "directory", "b"), { ...entry, name: "Band b" }));
 });
+
+test("tickets: fans read visible events and create unused payment codes only; staff run them; no cross-band", async () => {
+  await env.withSecurityRulesDisabled(async (ctx) => {
+    const db = ctx.firestore();
+    for (const b of ["a", "b", "c"]) {
+      await setDoc(doc(db, "bands", b, "tickets", "gig"), { name: "Gig", visible: true, prefix: "Band-may5", paidCount: 0, price: 10, endDate: "2099-01-01" });
+      await setDoc(doc(db, "bands", b, "tickets", "hidden"), { name: "Secret", visible: false, prefix: "Sec-may5", paidCount: 0, price: 10, endDate: "2099-01-01" });
+    }
+  });
+  const code = (id, over = {}) => ({ code: id.replace(/^band-may5/, "Band-may5"), qty: 2, createdAt: Date.now(), paid: false, usedDays: [], ...over });
+  const c = (db, b, t, id) => doc(db, "bands", b, "tickets", t, "codes", id);
+  const f = fan();
+  await assertSucceeds(getDoc(doc(f, "bands", "a", "tickets", "gig")));
+  await assertFails(getDoc(doc(f, "bands", "a", "tickets", "hidden")));
+  await assertFails(setDoc(doc(f, "bands", "a", "tickets", "x"), { name: "X", visible: true }));
+  await assertFails(updateDoc(doc(f, "bands", "a", "tickets", "gig"), { paidCount: 99 }));
+  // a fan creates a valid code
+  await assertSucceeds(setDoc(c(f, "a", "gig", "band-may5-abc123"), code("band-may5-abc123")));
+  // ...but never one that is already paid / used / oversized / wrong prefix / has extra fields / is for a hidden event / a paused band
+  await assertFails(setDoc(c(f, "a", "gig", "band-may5-aaa111"), code("band-may5-aaa111", { paid: true })));
+  await assertFails(setDoc(c(f, "a", "gig", "band-may5-aaa222"), code("band-may5-aaa222", { usedDays: ["2030-01-01"] })));
+  await assertFails(setDoc(c(f, "a", "gig", "band-may5-aaa333"), code("band-may5-aaa333", { qty: 21 })));
+  await assertFails(setDoc(c(f, "a", "gig", "band-may5-aaa444"), code("band-may5-aaa444", { qty: 0 })));
+  await assertFails(setDoc(c(f, "a", "gig", "other-xyz789"), { ...code("other-xyz789"), code: "Other-xyz789" }));
+  await assertFails(setDoc(c(f, "a", "gig", "band-may5-aaa555"), { ...code("band-may5-aaa555"), saleId: "s1" }));
+  await assertFails(setDoc(c(f, "a", "gig", "band-may5-aaa666"), { ...code("band-may5-aaa666"), code: "Band-may5-OTHER" }));
+  await assertFails(setDoc(c(f, "a", "hidden", "sec-may5-abc123"), { ...code("x"), code: "Sec-may5-abc123" }));
+  await assertFails(setDoc(c(f, "c", "gig", "band-may5-abc123"), code("band-may5-abc123")));
+  // a fan cannot read, list, change or delete codes (so no one can read or take over someone else's)
+  await assertFails(getDoc(c(f, "a", "gig", "band-may5-abc123")));
+  await assertFails(getDocs(collection(f, "bands", "a", "tickets", "gig", "codes")));
+  await assertFails(setDoc(c(f, "a", "gig", "band-may5-abc123"), code("band-may5-abc123"))); // collision = overwrite = refused
+  await assertFails(updateDoc(c(f, "a", "gig", "band-may5-abc123"), { paid: true }));
+  await assertFails(deleteDoc(c(f, "a", "gig", "band-may5-abc123")));
+  // band staff run their own tickets
+  const mate = as(ids.mateA);
+  await assertSucceeds(getDoc(c(mate, "a", "gig", "band-may5-abc123")));
+  await assertSucceeds(updateDoc(c(mate, "a", "gig", "band-may5-abc123"), { paid: true, usedDays: ["2030-01-01"] }));
+  await assertSucceeds(updateDoc(doc(mate, "bands", "a", "tickets", "gig"), { paidCount: 2 }));
+  await assertSucceeds(setDoc(doc(mate, "bands", "a", "tickets", "new"), { name: "New", visible: true, prefix: "N-1" }));
+  await assertSucceeds(deleteDoc(c(mate, "a", "gig", "band-may5-abc123")));
+  // never another band's tickets
+  await assertFails(setDoc(doc(mate, "bands", "b", "tickets", "x"), { name: "X", visible: true }));
+  await assertFails(getDocs(collection(mate, "bands", "b", "tickets", "gig", "codes")));
+  await assertFails(deleteDoc(doc(mate, "bands", "b", "tickets", "gig")));
+});

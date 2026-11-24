@@ -15,6 +15,7 @@ const TOPICS: { id: string; bullets: number; icon: ReactNode }[] = [
   { id: "qr", bullets: 5, icon: svg("M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h2v2h-2zM18 14h2v6h-4M14 18h2") },
   { id: "sell", bullets: 4, icon: svg("M3 7h18l-2 12H5zM8 7a4 4 0 0 1 8 0") },
   { id: "bundles", bullets: 3, icon: svg("M3 8h18v13H3zM3 12h18M12 8v13M12 8c-2-4-6-4-6-1s4 1 6 1c2 0 6 2 6-1s-4-3-6 1") },
+  { id: "tickets", bullets: 5, icon: svg("M3 9a2 2 0 0 0 0 6v3h18v-3a2 2 0 0 1 0-6V6H3zM14 6v12") },
   { id: "sales", bullets: 3, icon: svg("M4 20V10M10 20V4M16 20v-7M22 20H2") },
   { id: "fan", bullets: 4, icon: svg("M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z") },
   { id: "look", bullets: 3, icon: svg("M12 3a9 9 0 1 0 0 18c1.5 0 2-1 1.5-2-.6-1.2.2-2.5 1.6-2.5H17a4 4 0 0 0 4-4c0-5-4-9.5-9-9.5zM7.5 11h0M10 7.5h0M14.5 7.5h0") },

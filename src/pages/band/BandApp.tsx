@@ -17,6 +17,7 @@ import Sell from "./Sell";
 import Stock from "./Stock";
 import Bundles from "./Bundles";
 import Sales from "./Sales";
+import Tickets from "./Tickets";
 import SettingsPage from "./Settings";
 import Users from "./Users";
 import VerifyEmail from "../VerifyEmail";
@@ -60,6 +61,7 @@ const TABS: { to: string; label: Key; end?: boolean; icon: JSX.Element }[] = [
   { to: "/band", label: "tab.sell", end: true, icon: <path d="M3 7h18l-2 12H5zM8 7a4 4 0 0 1 8 0" /> },
   { to: "/band/stock", label: "tab.stock", icon: <path d="M3 8l9-5 9 5v8l-9 5-9-5zM3 8l9 5 9-5M12 13v8" /> },
   { to: "/band/bundles", label: "tab.bundles", icon: <path d="M3 8h18v13H3zM3 12h18M12 8v13M12 8c-2-4-6-4-6-1s4 1 6 1c2 0 6 2 6-1s-4-3-6 1" /> },
+  { to: "/band/tickets", label: "tab.tickets", icon: <path d="M3 9a2 2 0 0 0 0 6v3h18v-3a2 2 0 0 1 0-6V6H3zM14 6v12" /> },
   { to: "/band/sales", label: "tab.sales", icon: <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" /> },
   { to: "/band/settings", label: "tab.settings", icon: <path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0M14 4v4M8 10v4M16 16v4" /> },
 ];
@@ -100,6 +102,7 @@ function Layout() {
               <Route index element={<Sell />} />
               <Route path="stock" element={<Stock />} />
               <Route path="bundles" element={<Bundles />} />
+              <Route path="tickets" element={<Tickets />} />
               <Route path="sales" element={<Sales />} />
               <Route path="settings" element={<SettingsPage />} />
               <Route path="users" element={admin ? <Users /> : <Navigate to="/band" replace />} />

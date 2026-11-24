@@ -62,7 +62,7 @@ export interface Pick {
 }
 
 export interface SaleLine {
-  kind: "item" | "bundle";
+  kind: "item" | "bundle" | "ticket";
   refId: string;
   label: string;
   detail?: string;
@@ -159,4 +159,43 @@ export interface Invite {
   role: "bandmate";
   invitedBy: string;
   createdAt: number;
+}
+
+/** A ticketed event the band sells. Public if visible. Payment is by the band's own bank QR / link (not verified by BandMate). */
+export interface Ticket {
+  id: string;
+  name: string;
+  place: string;
+  /** yyyy-mm-dd; endDate = last day (same as startDate for one day). Codes are valid until the end of endDate. */
+  startDate: string;
+  endDate: string;
+  time: string;
+  price: number;
+  /** Maximum tickets; null = unlimited. */
+  max: number | null;
+  /** Tickets whose payment the band marked as verified (public, so fans see "sold out"). */
+  paidCount: number;
+  /** Start of every payment code, e.g. "Sawdust-may5". */
+  prefix: string;
+  qrUrl: string | null;
+  qrPath: string | null;
+  payUrl: string | null;
+  cardPay: boolean;
+  visible: boolean;
+  createdAt: number;
+  /** Expired codes were already deleted. */
+  cleaned?: boolean;
+}
+
+/** A payment code issued to a fan (doc id = lowercase code). Readable only by the band's staff. */
+export interface TicketCode {
+  id: string;
+  code: string;
+  qty: number;
+  createdAt: number;
+  /** The band saw the payment in its bank (a sale was recorded). */
+  paid: boolean;
+  saleId?: string;
+  /** Days (yyyy-mm-dd) on which this code was used at the door; once per day. */
+  usedDays: string[];
 }
