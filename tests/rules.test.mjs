@@ -493,3 +493,20 @@ test("a band's admin can delete their own band, but only in one step and never s
   // band b is untouched
   await assertSucceeds(getDoc(doc(as(ids.adminB), "bands", "b", "stock", "hat")));
 });
+
+test("directory: anyone reads it; only that band's own admin (or the operator) lists or unlists it, nothing else", async () => {
+  const entry = { name: "Band a", logoUrl: null, updatedAt: 1 };
+  await assertSucceeds(setDoc(doc(as(ids.adminA), "directory", "a"), entry));
+  await assertSucceeds(getDocs(collection(fan(), "directory")));
+  await assertSucceeds(getDoc(doc(fan(), "directory", "a")));
+  await assertFails(setDoc(doc(as(ids.mateA), "directory", "a"), entry)); // band mate is not admin
+  await assertFails(setDoc(doc(as(ids.adminB), "directory", "a"), entry)); // other band's admin
+  await assertFails(setDoc(doc(as(ids.stranger), "directory", "a"), entry));
+  await assertFails(setDoc(doc(fan(), "directory", "a"), entry));
+  await assertFails(setDoc(doc(as(ids.adminA), "directory", "a"), { ...entry, status: "x" })); // no extra fields
+  await assertFails(setDoc(doc(as(ids.adminA), "directory", "a"), { ...entry, name: "" }));
+  await assertFails(setDoc(doc(as(ids.adminA), "directory", "c"), entry)); // not their band
+  await assertFails(deleteDoc(doc(as(ids.adminB), "directory", "a")));
+  await assertSucceeds(deleteDoc(doc(as(ids.adminA), "directory", "a")));
+  await assertSucceeds(setDoc(doc(as(ids.platform), "directory", "b"), { ...entry, name: "Band b" }));
+});

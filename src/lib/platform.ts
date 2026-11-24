@@ -1,4 +1,5 @@
 // Everything only the BandMate operator, or a new band's founder at /start, touches.
+import { unlistFromDirectory } from "./directory";
 import { collection, deleteDoc, doc, getDoc, getDocs, limit, query, runTransaction, serverTimestamp, setDoc, updateDoc, where, writeBatch, type CollectionReference } from "firebase/firestore";
 import { deleteObject, listAll, ref } from "firebase/storage";
 import { db, storage } from "../firebase";
@@ -121,7 +122,8 @@ async function deleteStorageFolder(path: string) {
  *  e.g. after a typo in the address. The security rules allow the last few documents to go only in the final batch, together with
  *  the band itself. Their login stays. Irreversible. */
 export async function deleteOwnBand(bandId: string, uid: string) {
-  await deleteStorageFolder(`bands/${bandId}`); // first: it needs their membership
+  await unlistFromDirectory(bandId).catch(() => {}); // first: it needs their admin membership
+  await deleteStorageFolder(`bands/${bandId}`); // needs their membership too
   for (const sub of ["sales", "items", "stock", "bundles", "invites"]) await deleteAllIn(collection(db, "bands", bandId, sub));
   const members = await getDocs(collection(db, "bands", bandId, "members"));
   await Promise.all(members.docs.filter((d) => d.id !== uid).map((d) => deleteDoc(d.ref)));
@@ -138,6 +140,7 @@ export async function deleteOwnBand(bandId: string, uid: string) {
  *  The band record goes last, so an interrupted run can simply be started again. */
 export async function deleteBand(bandId: string) {
   await setBandStatus(bandId, "paused"); // closes the store for fans while it is being emptied
+  await unlistFromDirectory(bandId).catch(() => {});
   for (const sub of ["sales", "items", "stock", "bundles", "members", "invites"]) await deleteAllIn(collection(db, "bands", bandId, sub));
   for (const id of ["public", "band", "usage"]) await deleteDoc(doc(db, "bands", bandId, "settings", id));
   await deleteStorageFolder(`bands/${bandId}`);

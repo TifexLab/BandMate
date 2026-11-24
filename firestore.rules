@@ -38,6 +38,21 @@ service cloud.firestore {
       allow list, write: if platformAdmin();
     }
 
+    // Public directory of bands that chose to be listed on the BandMate home page: { name, logoUrl, updatedAt }.
+    // Anyone may read it. Only an active admin of that band (or the operator) can add, change or remove its own entry,
+    // and nothing else about the band is exposed by it. A band is listed only while its entry exists (default: not listed).
+    match /directory/{bandId} {
+      allow read: if true;
+      allow create, update: if (platformAdmin() || (verified()
+          && get(/databases/$(database)/documents/bands/$(bandId)/members/$(request.auth.uid)).data.role == 'admin'
+          && get(/databases/$(database)/documents/bands/$(bandId)).data.status == 'active'))
+        && request.resource.data.keys().hasOnly(['name', 'logoUrl', 'updatedAt'])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0 && request.resource.data.name.size() <= 80;
+      allow delete: if platformAdmin() || (verified()
+          && get(/databases/$(database)/documents/bands/$(bandId)/members/$(request.auth.uid)).data.role == 'admin');
+    }
+
     // "Which bands am I in?": one collection-group query by the signed-in person's own email, which
     // only returns member documents carrying their own verified email. The BandMate operator may look up
     // anyone's, to see that a person asking for a new band already belongs to one.

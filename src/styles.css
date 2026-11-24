@@ -511,3 +511,11 @@ input[type="range"] { width: 100%; accent-color: var(--primary); }
 .minus:active { transform: scale(.94); }
 
 .slowload { margin-top: 12px; align-items: stretch; }
+
+.dir { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); }
+.dir-list { list-style: none; margin: 0; padding: 0; max-height: 46dvh; overflow-y: auto; border: 1px solid var(--line); border-radius: var(--r); overscroll-behavior: contain; }
+.dir-list li + li { border-top: 1px solid var(--line); }
+.dir-list a { display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 6px 12px; color: var(--text); text-decoration: none; font-weight: 700; }
+.dir-list a:active { background: var(--sunk); }
+.dir-list img, .dir-ph { width: 36px; height: 36px; flex: none; border-radius: 8px; object-fit: cover; background: var(--sunk); display: flex; align-items: center; justify-content: center; color: var(--muted); font-weight: 800; }
+.dir-list span:last-child { min-width: 0; overflow-wrap: anywhere; }

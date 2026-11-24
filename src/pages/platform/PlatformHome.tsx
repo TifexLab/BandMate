@@ -7,6 +7,7 @@ import { errorText } from "../../lib/format";
 import { fetchMyBands, type MyBand } from "../../lib/memberships";
 import { useAuth, roleLabel } from "../../state/auth";
 import { useT } from "../../i18n";
+import BandDirectory from "../../components/BandDirectory";
 import LangSwitch from "../../components/LangSwitch";
 import { Loading } from "../../components/ui";
 import VerifyEmail from "../VerifyEmail";
@@ -89,6 +90,7 @@ function LoginCard() {
       >
         {t("login.forgot")}
       </button>
+      <BandDirectory />
     </Card>
   );
 }

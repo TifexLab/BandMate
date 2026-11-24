@@ -71,6 +71,15 @@ email/password, Firestore, Storage), hosted on Vercel, code on GitHub. Setup ste
   verification email is still sent, just without its "continue" button). `*.bandmate.shop` needs the wildcard
   domain added in Vercel (Vercel DNS).
 
+## Band directory (bandmate.shop home)
+- Signed-out visitors on the BandMate home see "Find a band" (`components/BandDirectory.tsx`): a search box (matches any part of the name,
+  ignores case and accents, `fold()` in `lib/directory.ts`) and an A-Z list; a click opens `bandUrl(id)` (`<id>.bandmate.shop`).
+  There is deliberately NO cross-band merch browsing: each band's merch stays on its own address.
+- Only bands that opted in appear. Opt-in = a doc `directory/{bandId}` `{name, logoUrl, updatedAt}` (public read; write/delete only by that
+  band's active admin or the operator; no other fields). Default: not listed. Toggle in Settings (`components/DirectoryCard.tsx`, admin only);
+  the card also keeps name/logo in step with `settings/public`. A paused band stays listed but its page shows "Temporarily closed".
+  `deleteOwnBand`/`deleteBand` remove the entry. The whole list is fetched once and filtered in the browser (fine up to a few thousand bands).
+
 ## Roles (source of truth: `firestore.rules`, `storage.rules`; tests in `tests/rules.test.mjs`)
 Roles live in `bands/{bandId}/members/{uid}.role`:
 - Fan (not signed in): reads one active band's `items`/`bundles` where `visible == true`, and `settings/public`. Never stock or sales.
