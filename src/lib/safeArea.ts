@@ -1,8 +1,9 @@
 // iPhone / iPad apps added to the home screen sometimes report 0 for env(safe-area-inset-*), so the header slid under the status bar and the
 // bottom menu sat on the home-indicator line. When that happens we set a fallback (--sa-top / --sa-bottom, read in styles.css); where env() works
 // (browsers, other phones) nothing is set and the real values are used.
-/** After coming back from the background an iPhone home-screen app can shrink its layout viewport by the status-bar height, so bottom-fixed things
- *  (menu, sheets) stop ~60px above the real screen bottom. Measure where "bottom: 0" really is and push those elements down by the difference (--vp-gap). */
+/** After coming back from the background an iPhone home-screen app can shrink its layout viewport by the status-bar height. Fixed elements (the bottom menu)
+ *  then end ~60px above the real screen bottom and cannot be drawn into the leftover strip. Detect it (where "bottom: 0" really lands vs the screen height,
+ *  --vp-gap) and mark <html class="vp-short"> so the strip is painted in the menu's colour (styles.css). */
 function measureGap(root: HTMLElement) {
   if (!/iphone/i.test(navigator.userAgent) || window.innerHeight < window.innerWidth) return;
   const m = document.createElement("div");
@@ -10,7 +11,10 @@ function measureGap(root: HTMLElement) {
   document.body.appendChild(m);
   const gap = Math.round(screen.height - m.getBoundingClientRect().bottom);
   m.remove();
-  if (gap >= 20 && gap <= 100) root.style.setProperty("--vp-gap", `${gap}px`);
+  if (gap >= 20 && gap <= 100) {
+    root.style.setProperty("--vp-gap", `${gap}px`);
+    root.classList.add("vp-short");
+  }
 }
 
 function apply() {
@@ -20,6 +24,7 @@ function apply() {
   root.style.removeProperty("--sa-top");
   root.style.removeProperty("--sa-bottom");
   root.style.removeProperty("--vp-gap");
+  root.classList.remove("vp-short");
   if (!ios || !standalone || !document.body) return;
   measureGap(root);
   const probe = document.createElement("div");
