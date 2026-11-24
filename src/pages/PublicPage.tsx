@@ -51,24 +51,13 @@ export default function PublicPage() {
       <main className="page">
         <div className="wrap">
           {upcomingTickets.length > 0 && (
-            <>
-              <h2 className="sec">{t("tk.fanSection")}</h2>
-              <div className="grid">
-                {upcomingTickets.map((x) => (
-                  <article className="tile" key={x.id}>
-                    <div className="tile-top">
-                      <div>
-                        <h3>{x.name}</h3>
-                        <div className="sub">{x.startDate.split("-").reverse().map(Number).join(".")}{x.time ? ` · ${x.time}` : ""}{x.place ? ` · ${x.place}` : ""}</div>
-                      </div>
-                      <span className="tag">{money(x.price, cur)}</span>
-                    </div>
-                    <Link className="btn primary block" to={`/listok/${x.id}`}>{t("tk.fanBuy")}</Link>
-                  </article>
-                ))}
-              </div>
-              <h2 className="sec">{t("tk.fanMerch")}</h2>
-            </>
+            <Link className="concert-cell" to="/listky">
+              <span>
+                <b>{t("tk.concerts")}</b>
+                <small>{upcomingTickets.length === 1 ? upcomingTickets[0].name : t("tk.concertsCount", { n: upcomingTickets.length })}</small>
+              </span>
+              <span aria-hidden="true">→</span>
+            </Link>
           )}
           {!items.ready ? (
             <Loading text={t("fan.loading")} />

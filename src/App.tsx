@@ -13,6 +13,7 @@ import { ToastProvider } from "./state/toast";
 import TenantGate from "./components/TenantGate";
 import { Loading } from "./components/ui";
 import TicketPage from "./pages/TicketPage";
+import TicketsListPage from "./pages/TicketsListPage";
 import PublicPage from "./pages/PublicPage";
 import { Login } from "./pages/AuthPages";
 import Accept from "./pages/band/Accept";
@@ -92,6 +93,7 @@ function BandRoutes() {
   return (
     <Routes>
       <Route path="/" element={<PublicPage />} />
+      <Route path="/listky" element={<TicketsListPage />} />
       <Route path="/listok/:ticketId" element={<TicketPage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/accept" element={<Accept />} />
