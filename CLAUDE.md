@@ -245,7 +245,10 @@ Design for a phone in one hand first (320-430px), then scale up. Never assume a 
   Use it for every page-level container instead of a fixed pixel width.
 - Use `.flow` (CSS `column-width: 440px`) to put cards or groups side by side only when each column
   can be 440px wide. Phones and tablets in portrait stay one column; no extra breakpoints needed.
-- Tap targets at least 44px, bottom tab bar and sheets respect `env(safe-area-inset-*)`.
+- Tap targets at least 44px, bottom tab bar and sheets respect the safe areas through `--safe-top` / `--safe-bottom` (styles.css), never raw `env(safe-area-inset-*)`
+  for top/bottom: an iPhone/iPad app added to the home screen can report env() = 0 (header slid under the status bar, menu sat on the home-indicator line),
+  so `lib/safeArea.ts` probes it and, only then, sets the fallback `--sa-top` / `--sa-bottom` from the screen size; the larger of env() and the fallback wins.
+  The bottom menu keeps at least 10px below it (`--tabs-pad`); tab labels shrink with the screen width and end in an ellipsis rather than overlap (7 tabs for admins).
 - Before shipping UI changes, check 320, 390, 820 (tablet), 1440 and 1920 wide, plus 844x390 landscape,
   and make sure `document.documentElement.scrollWidth <= innerWidth` (no sideways scroll).
   Run against emulators (`npm run emulators`, `VITE_USE_EMULATORS=true VITE_FIREBASE_PROJECT_ID=demo-bandmate`)

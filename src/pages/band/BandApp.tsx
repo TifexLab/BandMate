@@ -118,7 +118,7 @@ function Layout() {
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 {tab.icon}
               </svg>
-              {t(tab.label)}
+              <span className="tab-lbl">{t(tab.label)}</span>
               {tab === USERS_TAB && pendingCount > 0 && <span className="tab-badge">{pendingCount}</span>}
             </NavLink>
           ))}

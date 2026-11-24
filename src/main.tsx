@@ -4,6 +4,9 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import { LangProvider } from "./i18n";
 import "./styles.css";
+import { initSafeArea } from "./lib/safeArea";
+
+initSafeArea();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
