@@ -554,5 +554,8 @@ input[type="range"] { width: 100%; accent-color: var(--primary); }
 .diag-row { display: flex; justify-content: space-between; gap: 10px; padding: 4px 0; border-bottom: 1px solid var(--line); font-size: .78rem; }
 .diag-row small { color: var(--muted); } .diag-row .mono { text-align: right; overflow-wrap: anywhere; }
 /* iPhone home-screen app whose layout viewport ended up shorter than the screen (see lib/safeArea.ts): fixed things cannot be drawn into the
-   leftover strip at the bottom, so paint that strip in the menu's colour and drop the menu's own bottom padding. */
-html.vp-short { background: var(--surface); --tabs-pad: 10px; }
+   leftover strip at the bottom, so the menu takes the page colour (the strip below it then does not read as a separate block), loses its own
+   bottom padding and keeps its items near its bottom edge. */
+html.vp-short { --tabs-pad: 2px; }
+html.vp-short .tabs { background: var(--bg); }
+html.vp-short .tab { justify-content: flex-end; padding-bottom: 7px; }
