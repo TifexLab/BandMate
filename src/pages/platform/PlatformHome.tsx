@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { Navigate } from "react-router-dom";
-import { sendPasswordResetEmail, signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { GoogleAuthProvider, sendPasswordResetEmail, signInWithEmailAndPassword, signInWithPopup, signOut } from "firebase/auth";
 import { auth } from "../../firebase";
 import { Link } from "../../lib/nav";
 import { errorText } from "../../lib/format";
@@ -57,6 +57,22 @@ function LoginCard() {
     }
   };
 
+  const google = async () => {
+    setBusy(true);
+    setErr("");
+    setInfo("");
+    try {
+      await signInWithPopup(auth, new GoogleAuthProvider());
+    } catch (x) {
+      const code = (x as { code?: string })?.code;
+      if (code !== "auth/popup-closed-by-user" && code !== "auth/cancelled-popup-request") {
+        setErr(code === "auth/unauthorized-domain" ? t("login.googleDomain") : errorText(x));
+      }
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <Card>
       <p className="note">{t("home.tagline")}</p>
@@ -73,6 +89,7 @@ function LoginCard() {
         {info && <p className="hint">{info}</p>}
         <button className="btn primary block" disabled={busy}>{busy ? t("common.signingIn") : t("home.loginBtn")}</button>
       </form>
+      <button type="button" className="btn ghost block" disabled={busy} onClick={google}>{t("login.google")}</button>
       <Link className="btn ghost block" to="/start">{t("home.start")}</Link>
       <button
         type="button"

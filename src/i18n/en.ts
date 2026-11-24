@@ -71,6 +71,8 @@ export const en = {
   "login.titleCustomer": "Sign in",
   "login.email": "Email",
   "login.password": "Password",
+  "login.google": "Continue with Google",
+  "login.googleDomain": "Google sign-in is not allowed from this address yet. Use email and password.",
   "login.signIn": "Sign in",
   "login.forgot": "Forgot password?",
   "login.typeEmailFirst": "Type your email first, then tap Forgot password.",

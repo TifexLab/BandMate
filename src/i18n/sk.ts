@@ -73,6 +73,8 @@ export const sk: Record<Key, string> = {
   "login.titleCustomer": "Prihlásenie",
   "login.email": "E-mail",
   "login.password": "Heslo",
+  "login.google": "Pokračovať cez Google",
+  "login.googleDomain": "Prihlásenie cez Google z tejto adresy zatiaľ nie je povolené. Použi e-mail a heslo.",
   "login.signIn": "Prihlásiť sa",
   "login.forgot": "Zabudnuté heslo?",
   "login.typeEmailFirst": "Najprv napíš svoj e-mail, potom klepni na Zabudnuté heslo.",

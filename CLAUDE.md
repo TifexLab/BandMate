@@ -34,6 +34,10 @@ email/password, Firestore, Storage), hosted on Vercel, code on GitHub. Setup ste
   "Which bands am I in" = `fetchMyBands` collection-group query on `members.email` (`lib/memberships.ts`; rule
   `/{path=**}/members/{id}` returns only docs with the signed-in verified email; needs the `members.email` collection-group
   index in `firestore.indexes.json`). The operator login at `/platform/login` still exists.
+- **Google sign-in** exists ONLY on the bandmate.shop home (`PlatformHome.tsx`, `signInWithPopup`). Firebase's authorized-domains list takes no
+  wildcards, so `<band>.bandmate.shop` can't use the popup; after Google login the home sends a one-band person to `/b/<id>/band` as usual.
+  Needs the Google provider enabled in Firebase Auth. Google emails are verified, so rules need no change. Not testable in the sandbox
+  (the popup loads apis.google.com); check it on the real site.
 - Getting a band (self-service): bandmate.shop home "Start Your BandMate" button (`/start`,
   `src/pages/platform/StartPage.tsx`) is ONE form: your name, band name, address (= future `bandId`, checked live), plan
   (Free, or Pro shown as "coming soon"; "Compare plans" opens `PlanTable`), band email (this is the master login, the only
