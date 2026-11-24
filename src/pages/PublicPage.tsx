@@ -51,13 +51,7 @@ export default function PublicPage() {
       <main className="page">
         <div className="wrap">
           {upcomingTickets.length > 0 && (
-            <Link className="concert-cell" to="/listky">
-              <span>
-                <b>{t("tk.concerts")}</b>
-                <small>{upcomingTickets.length === 1 ? upcomingTickets[0].name : t("tk.concertsCount", { n: upcomingTickets.length })}</small>
-              </span>
-              <span aria-hidden="true">→</span>
-            </Link>
+            <Link className="concert-cell" to="/listky">{t("tk.concerts")} <span aria-hidden="true">→</span></Link>
           )}
           {!items.ready ? (
             <Loading text={t("fan.loading")} />

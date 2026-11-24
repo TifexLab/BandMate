@@ -10,6 +10,7 @@ import { useTenant } from "../../state/tenant";
 import { errorText, money } from "../../lib/format";
 import { cleanPayUrl } from "../../lib/qrdecode";
 import { cleanupEnded, defaultPrefix, deleteCode, isEnded, markPaid, markUnpaid, markUsed, prefixOk, ticketLink, todayLocal, unmarkUsed } from "../../lib/tickets";
+import { useSwipeBack } from "../../lib/swipeBack";
 import { useT } from "../../i18n";
 import { useQr } from "../../components/brand";
 import { ConfirmButton, PaySection, Sheet, Toggle } from "../../components/ui";
@@ -97,6 +98,7 @@ function Detail({ ticket, onBack, onEdit, edit, setEdit }: { ticket: Ticket; onB
   const codes = useLiveQuery<TicketCode>(() => bandCol(`tickets/${ticket.id}/codes`), `tcodes-${bandId}-${ticket.id}`);
   const [q, setQ] = useState("");
   const [filter, setFilter] = useState<"all" | "unpaid" | "paid" | "today">("all");
+  useSwipeBack(onBack);
   const link = ticketLink(ticket.id);
   const qr = useQr(link);
   const day = todayLocal();

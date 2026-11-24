@@ -7,6 +7,7 @@ import { isEnded } from "../lib/tickets";
 import { useSettings } from "../state/settings";
 import { useTenant } from "../state/tenant";
 import { useT } from "../i18n";
+import BackBar from "../components/BackBar";
 import LangSwitch from "../components/LangSwitch";
 import { LogoBackdrop } from "../components/brand";
 import { Loading } from "../components/ui";
@@ -24,6 +25,7 @@ export default function TicketsListPage() {
   return (
     <>
       <LogoBackdrop settings={settings} />
+      <BackBar fallback="/" />
       <header className="hero">
         <div className="hero-in">
           {settings.logoInHeader && settings.logoUrl && <img className="hero-logo" src={settings.logoUrl} alt="" />}
