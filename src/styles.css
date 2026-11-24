@@ -535,6 +535,8 @@ input[type="range"] { width: 100%; accent-color: var(--primary); }
 .paycode .actions { justify-content: center; }
 .tag.big { font-size: 1.2rem; display: inline-block; margin: 6px 0 10px; }
 
-.concert-cell { display: flex; width: fit-content; align-self: flex-start; align-items: center; gap: 10px; min-height: 44px; padding: 0 16px; margin-bottom: 12px; background: var(--primary); color: var(--on-primary); border-radius: var(--r); text-decoration: none; font-size: .9rem; font-weight: 800; }
+.hero-side { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex: none; }
+.concert-cell { position: relative; display: inline-flex; align-items: center; min-height: 26px; padding: 0 10px; background: var(--primary); color: var(--on-primary); border-radius: 13px; text-decoration: none; font-size: .68rem; font-weight: 800; white-space: nowrap; }
+.concert-cell::after { content: ""; position: absolute; inset: -9px -6px; } /* keeps a finger-sized tap area */
 .backbar { max-width: var(--maxw); margin: 0 auto; padding: calc(8px + env(safe-area-inset-top, 0px)) 14px 0; }
 .backbtn { min-height: 44px; padding: 0 12px 0 4px; background: none; border: 0; color: var(--text); font: inherit; font-weight: 700; cursor: pointer; }

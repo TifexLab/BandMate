@@ -45,14 +45,14 @@ export default function PublicPage() {
             <h1>{settings.bandName || (ready ? "Merch" : "")}</h1>
             {settings.tagline && <p>{settings.tagline}</p>}
           </div>
-          <LangSwitch />
+          <div className="hero-side">
+            <LangSwitch />
+            {upcomingTickets.length > 0 && <Link className="concert-cell" to="/listky">{t("tk.concerts")} →</Link>}
+          </div>
         </div>
       </header>
       <main className="page">
         <div className="wrap">
-          {upcomingTickets.length > 0 && (
-            <Link className="concert-cell" to="/listky">{t("tk.concerts")} <span aria-hidden="true">→</span></Link>
-          )}
           {!items.ready ? (
             <Loading text={t("fan.loading")} />
           ) : !groups.length && !bundleList.length ? (
