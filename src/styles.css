@@ -519,3 +519,7 @@ input[type="range"] { width: 100%; accent-color: var(--primary); }
 .dir-list a:active { background: var(--sunk); }
 .dir-list img, .dir-ph { width: 36px; height: 36px; flex: none; border-radius: 8px; object-fit: cover; background: var(--sunk); display: flex; align-items: center; justify-content: center; color: var(--muted); font-weight: 800; }
 .dir-list span:last-child { min-width: 0; overflow-wrap: anywhere; }
+
+.stocknote { display: block; font-size: .75rem; color: var(--muted); }
+.stocknote.low { color: var(--primary); font-weight: 800; }
+.chip .stocknote { margin-top: 1px; }

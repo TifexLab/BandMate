@@ -11,7 +11,7 @@ const svg = (d: string) => (
 
 const TOPICS: { id: string; bullets: number; icon: ReactNode }[] = [
   { id: "start", bullets: 4, icon: svg("M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 16v-4M12 8h0") },
-  { id: "stock", bullets: 5, icon: svg("M3 8l9-5 9 5v8l-9 5-9-5zM3 8l9 5 9-5M12 13v8") },
+  { id: "stock", bullets: 6, icon: svg("M3 8l9-5 9 5v8l-9 5-9-5zM3 8l9 5 9-5M12 13v8") },
   { id: "qr", bullets: 5, icon: svg("M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h2v2h-2zM18 14h2v6h-4M14 18h2") },
   { id: "sell", bullets: 4, icon: svg("M3 7h18l-2 12H5zM8 7a4 4 0 0 1 8 0") },
   { id: "bundles", bullets: 3, icon: svg("M3 8h18v13H3zM3 12h18M12 8v13M12 8c-2-4-6-4-6-1s4 1 6 1c2 0 6 2 6-1s-4-3-6 1") },

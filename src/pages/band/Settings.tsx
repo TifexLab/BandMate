@@ -8,6 +8,7 @@ import { useSettings } from "../../state/settings";
 import { useBand } from "../../state/band";
 import { useTenant } from "../../state/tenant";
 import { ExtendButton, UsageCard } from "../../components/plans";
+import StockViewCard from "../../components/StockViewCard";
 import DirectoryCard from "../../components/DirectoryCard";
 import InstallCard from "../../components/InstallCard";
 import Help from "../../components/Help";
@@ -33,6 +34,7 @@ export default function SettingsPage() {
       <InstallCard />
       <Help />
       <BandSection />
+      <StockViewCard />
       <DirectoryCard />
       <LookSection />
       <TopBarSection />

@@ -109,7 +109,11 @@ Accounts made by the scripts are marked verified. Unverified Auth accounts stay 
   Sizes of one product share the same `name`; the UI groups by name. Photos belong to the product: the item
   form writes the same `images` to every size of that name (first photo = main). `bundles` also have `images`.
 - `stock/{itemId}`: { qty } — staff only. Kept separate so fans can never read counts.
-  `items.soldOut` is the only stock signal fans see; every stock write must update it.
+  `items.soldOut` is the stock signal fans always see; every stock write must update it. Optional extra public hints, ONLY while the band
+  switched them on in Settings (`settings/public.stockView {count, low, threshold}`, card `StockViewCard`): `items.left` (exact pieces, when
+  `count`) and `items.low` (true when 1..threshold pieces, when `low`). All stock writes in `lib/ops.ts` spread `publicStockFields(qty)`
+  (`lib/stockView.ts`) instead of writing `soldOut` by hand, and changing the choice runs `syncPublicStock` over all items (it removes the
+  fields when off, so a count is never exposed unless chosen; "low" alone never stores the exact count).
 - `bundles/{id}`: name, price, parts[{name, qty}] (parts reference item *names*; size chosen at sale), qrUrl, visible, order.
 - `sales/{id}`: at, by, byName, method (qr|cash|card|quick), gig, total, lines[{kind, refId, label, detail?, price, qty, picks[{itemId, qty}]}], undone.
   Staff may only change `undone` after creation.

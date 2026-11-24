@@ -29,6 +29,9 @@ export interface Item {
   cardPay?: boolean;
   visible: boolean;
   soldOut: boolean;
+  /** Public stock hints, present only while the band chose to show them (see lib/stockView.ts). */
+  left?: number;
+  low?: boolean;
   order: number;
   /** Shared by every size of the same product (kept in sync on save). First one is the main photo. */
   images?: Photo[];
@@ -105,6 +108,13 @@ export interface TopBarSettings {
   links: SocialLink[];
 }
 
+/** What fans may see about stock: exact count, a "few left" highlight (<= threshold pieces), both or neither. */
+export interface StockView {
+  count: boolean;
+  low: boolean;
+  threshold: number;
+}
+
 export interface PublicSettings {
   bandName: string;
   tagline: string;
@@ -116,6 +126,7 @@ export interface PublicSettings {
   logoOpacity: number;
   logoInHeader: boolean;
   topBar: TopBarSettings;
+  stockView?: StockView;
 }
 
 export interface BandSettings {

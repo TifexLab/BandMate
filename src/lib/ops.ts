@@ -8,6 +8,7 @@ import { doc, increment, writeBatch, setDoc, updateDoc } from "firebase/firestor
 import { db } from "../firebase";
 import { bandCol, bandDoc, bandPath } from "./scope";
 import { assertItemRoom } from "./planState";
+import { publicStockFields } from "./stockView";
 import type { Item, Method, Photo, Sale, SaleLine } from "../types";
 
 type StockMap = Record<string, number>;
@@ -40,7 +41,7 @@ export function recordSale(opts: {
   const ref = doc(bandCol("sales"));
   for (const [id, n] of Object.entries(picksTotal(opts.lines))) {
     b.set(bandDoc("stock", id), { qty: increment(-n) }, { merge: true });
-    b.update(bandDoc("items", id), { soldOut: (opts.stock[id] ?? 0) - n <= 0 });
+    b.update(bandDoc("items", id), publicStockFields((opts.stock[id] ?? 0) - n));
   }
   const total = opts.lines.reduce((t, l) => t + l.price * l.qty, 0);
   b.set(ref, {
@@ -64,7 +65,7 @@ export function setSaleUndone(sale: Pick<Sale, "id" | "lines">, undone: boolean,
   for (const [id, n] of Object.entries(picksTotal(sale.lines))) {
     if (!exists.has(id)) continue;
     b.set(bandDoc("stock", id), { qty: increment(sign * n) }, { merge: true });
-    b.update(bandDoc("items", id), { soldOut: (stock[id] ?? 0) + sign * n <= 0 });
+    b.update(bandDoc("items", id), publicStockFields((stock[id] ?? 0) + sign * n));
   }
   b.update(bandDoc("sales", sale.id), { undone });
   return b.commit();
@@ -80,14 +81,14 @@ export function deleteCancelledSales(ids: string[]) {
 export function addStock(itemId: string, delta: number, current: number) {
   const b = writeBatch(db);
   b.set(bandDoc("stock", itemId), { qty: increment(delta) }, { merge: true });
-  b.update(bandDoc("items", itemId), { soldOut: current + delta <= 0 });
+  b.update(bandDoc("items", itemId), publicStockFields(current + delta));
   return b.commit();
 }
 
 export function setStockCount(itemId: string, qty: number) {
   const b = writeBatch(db);
   b.set(bandDoc("stock", itemId), { qty });
-  b.update(bandDoc("items", itemId), { soldOut: qty <= 0 });
+  b.update(bandDoc("items", itemId), publicStockFields(qty));
   return b.commit();
 }
 
@@ -101,7 +102,7 @@ export function createItems(
   const b = writeBatch(db);
   list.forEach(({ variant, qty }, i) => {
     const ref = doc(bandCol("items"));
-    b.set(ref, { ...base, variant, soldOut: qty <= 0, order: orderStart + i });
+    b.set(ref, { ...base, variant, ...publicStockFields(qty), order: orderStart + i });
     b.set(bandDoc("stock", ref.id), { qty });
   });
   b.set(usageDoc(), { items: increment(list.length) }, { merge: true });

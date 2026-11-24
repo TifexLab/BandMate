@@ -16,6 +16,8 @@ import type { Bundle, Item, Photo } from "../types";
 /** What fans see: products, prices and payment QR codes. Never stock counts. */
 export default function PublicPage() {
   const t = useT();
+  /** What the band chose to show about stock for one item: exact pieces and/or a "last pieces" hint. */
+  const stockNote = (it: Item) => (typeof it.left === "number" ? t("fan.left", { n: it.left }) : it.low ? t("fan.lastPieces") : "");
   const { settings, ready } = useSettings();
   const { profile } = useAuth();
   const { bandId } = useTenant();
@@ -67,9 +69,12 @@ export default function PublicPage() {
                         <span className="tag">{priceTag(g.items, cur)}</span>
                       </div>
                       {single ? (
+                        <>
+                        {!g.items[0].soldOut && stockNote(g.items[0]) && <span className={`stocknote ${g.items[0].low ? "low" : ""}`}>{stockNote(g.items[0])}</span>}
                         <button className="btn primary block" disabled={g.items[0].soldOut} onClick={() => open(g.name, g.items[0].price, g.items[0].qrUrl, g.items[0].payUrl, g.items[0].cardPay)}>
                           {g.items[0].soldOut ? t("fan.soldOut") : g.items[0].qrUrl || g.items[0].payUrl || g.items[0].cardPay ? t("fan.showQr") : t("fan.buyAtTable")}
                         </button>
+                        </>
                       ) : (
                         <>
                           <div className="sizes">
@@ -83,6 +88,7 @@ export default function PublicPage() {
                               >
                                 <b>{it.variant || t("common.oneSize")}</b>
                                 <small>{it.soldOut ? t("fan.soldOut") : money(it.price, cur)}</small>
+                                {!it.soldOut && stockNote(it) && <small className={`stocknote ${it.low ? "low" : ""}`}>{stockNote(it)}</small>}
                               </button>
                             ))}
                           </div>

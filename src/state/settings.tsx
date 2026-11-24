@@ -4,6 +4,7 @@ import { PRESETS, applyTheme } from "../lib/theme";
 import { bandPath } from "../lib/scope";
 import type { PublicSettings, Theme } from "../types";
 import { useTenant } from "./tenant";
+import { DEFAULT_STOCK_VIEW, setStockViewMode } from "../lib/stockView";
 
 export const DEFAULT_SETTINGS: PublicSettings = {
   bandName: "",
@@ -16,6 +17,7 @@ export const DEFAULT_SETTINGS: PublicSettings = {
   logoOpacity: 0.12,
   logoInHeader: true,
   topBar: { enabled: false, email: "", links: [] },
+  stockView: DEFAULT_STOCK_VIEW,
 };
 
 interface SettingsState {
@@ -37,7 +39,9 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     ...d,
     theme: { ...DEFAULT_SETTINGS.theme, ...(d.theme || {}) },
     topBar: { ...DEFAULT_SETTINGS.topBar, ...(d.topBar || {}) },
+    stockView: { ...DEFAULT_STOCK_VIEW, ...(d.stockView || {}) },
   };
+  setStockViewMode(settings.stockView!);
   const t = preview || settings.theme;
   const themeKey = `${t.primary}${t.bg}${t.surface}${t.text}`;
 
