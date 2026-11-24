@@ -62,7 +62,9 @@ function LoginCard() {
     setErr("");
     setInfo("");
     try {
-      await signInWithPopup(auth, new GoogleAuthProvider());
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: "select_account" }); // always show the account list, never silently reuse the last account
+      await signInWithPopup(auth, provider);
     } catch (x) {
       const code = (x as { code?: string })?.code;
       if (code !== "auth/popup-closed-by-user" && code !== "auth/cancelled-popup-request") {
