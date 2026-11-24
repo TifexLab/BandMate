@@ -209,6 +209,7 @@ export const sk: Record<Key, string> = {
   "tk.concerts": "Koncerty a lístky",
   "tk.concertsCount": "{n} nadchádzajúce akcie",
   "tk.noUpcoming": "Zatiaľ žiadne nadchádzajúce akcie.",
+  "diag.link": "Kontrola obrazovky (pre podporu)",
   "diag.title": "Kontrola obrazovky",
   "diag.hint": "Odfoť túto stránku a pošli ju. Červený pruh má byť úplne hore a modrý pruh úplne dole na obrazovke.",
   "tab.sales": "Tržby",

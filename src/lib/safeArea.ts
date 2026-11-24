@@ -18,7 +18,7 @@ function apply() {
   const portrait = window.innerHeight >= window.innerWidth;
   const h = Math.max(screen.width, screen.height);
   const tablet = Math.min(screen.width, screen.height) >= 700;
-  const top = tablet ? 24 : !portrait ? 0 : h >= 852 ? 59 : h >= 812 ? 47 : 20;
+  const top = tablet ? 24 : !portrait ? 0 : h >= 874 ? 62 : h >= 852 ? 59 : h >= 812 ? 47 : 20;
   const bottom = tablet ? 20 : h >= 812 ? (portrait ? 34 : 21) : 0;
   root.style.setProperty("--sa-top", `${top}px`);
   root.style.setProperty("--sa-bottom", `${bottom}px`);

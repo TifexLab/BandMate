@@ -28,6 +28,7 @@ import type { PublicSettings, SocialLink, Theme } from "../../types";
 const CURRENCIES = ["€", "Kč", "zł", "Ft", "£", "$", "kr", "CHF"];
 
 export default function SettingsPage() {
+  const t = useT();
   return (
     <div className="flow">
       <PlanSection />
@@ -40,6 +41,7 @@ export default function SettingsPage() {
       <TopBarSection />
       <AccountSection />
       <DeleteBandCard />
+      <p className="note center"><Link to="/diag">{t("diag.link")}</Link></p>
     </div>
   );
 }
