@@ -248,7 +248,7 @@ Design for a phone in one hand first (320-430px), then scale up. Never assume a 
 - Tap targets at least 44px, bottom tab bar and sheets respect the safe areas through `--safe-top` / `--safe-bottom` (styles.css), never raw `env(safe-area-inset-*)`
   for top/bottom: an iPhone/iPad app added to the home screen can report env() = 0 (header slid under the status bar, menu sat on the home-indicator line),
   so `lib/safeArea.ts` probes it and, only then, sets the fallback `--sa-top` / `--sa-bottom` from the screen size; the larger of env() and the fallback wins.
-  The bottom menu keeps at least 10px below it (`--tabs-pad`); tab labels shrink with the screen width and end in an ellipsis rather than overlap (7 tabs for admins).
+  iOS can also shrink the layout viewport of a home-screen app by the status-bar height after returning from the background (bottom-fixed menu then stops ~62px above the screen bottom; `/diag` shows `documentElement.clientHeight` 62 less than `innerHeight`); `safeArea.ts` measures where `bottom:0` really lands and sets `--vp-gap`, which `.tabs`, `.scrim`, `.viewer`, `.basket`, `.toast` subtract. `/diag` (link at the bottom of Settings) shows all these numbers for support. The bottom menu keeps at least 10px below it (`--tabs-pad`); tab labels shrink with the screen width and end in an ellipsis rather than overlap (7 tabs for admins).
 - Before shipping UI changes, check 320, 390, 820 (tablet), 1440 and 1920 wide, plus 844x390 landscape,
   and make sure `document.documentElement.scrollWidth <= innerWidth` (no sideways scroll).
   Run against emulators (`npm run emulators`, `VITE_USE_EMULATORS=true VITE_FIREBASE_PROJECT_ID=demo-bandmate`)

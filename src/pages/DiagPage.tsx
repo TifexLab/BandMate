@@ -18,6 +18,7 @@ export default function DiagPage() {
     probe.remove();
     return () => { window.removeEventListener("resize", on); window.visualViewport?.removeEventListener("resize", on); };
   }, []);
+  const probe2 = (() => { const m = document.createElement("div"); m.style.cssText = "position:fixed;left:0;bottom:0;width:1px;height:1px;visibility:hidden"; document.body.appendChild(m); const v = Math.round(m.getBoundingClientRect().bottom); m.remove(); return v; })();
   const standalone = window.matchMedia("(display-mode: standalone)").matches || (navigator as unknown as { standalone?: boolean }).standalone === true;
   const rows: [string, string][] = [
     ["innerWidth x innerHeight", `${window.innerWidth} x ${window.innerHeight}`],
@@ -26,6 +27,8 @@ export default function DiagPage() {
     ["documentElement client", `${document.documentElement.clientWidth} x ${document.documentElement.clientHeight}`],
     ["env(safe-area) top/right/bottom/left", `${env.top} / ${env.right} / ${env.bottom} / ${env.left}`],
     ["--sa-top / --sa-bottom", `${getComputedStyle(document.documentElement).getPropertyValue("--sa-top").trim() || "-"} / ${getComputedStyle(document.documentElement).getPropertyValue("--sa-bottom").trim() || "-"}`],
+    ["fixed bottom:0 lands at (should equal screen height)", String(probe2)],
+    ["--vp-gap (menu pushed down by)", getComputedStyle(document.documentElement).getPropertyValue("--vp-gap").trim() || "-"],
     ["home-screen app (standalone)", String(standalone)],
     ["devicePixelRatio", String(window.devicePixelRatio)],
     ["orientation", window.innerHeight >= window.innerWidth ? "portrait" : "landscape"],
@@ -34,11 +37,11 @@ export default function DiagPage() {
   return (
     <main className="page">
       <div className="wrap">
-        <h1>{t("diag.title")}</h1>
+        <h1 className="diag-h">{t("diag.title")}</h1>
         <p className="note">{t("diag.hint")}</p>
         <div className="stack-sm">
           {rows.map(([k, v]) => (
-            <div className="card" key={k}><small className="note">{k}</small><div className="mono">{v}</div></div>
+            <div className="diag-row" key={k}><small>{k}</small><span className="mono">{v}</span></div>
           ))}
         </div>
       </div>
