@@ -553,9 +553,20 @@ input[type="range"] { width: 100%; accent-color: var(--primary); }
 .diag-h { font-size: 1.3rem; margin: 0 0 4px; }
 .diag-row { display: flex; justify-content: space-between; gap: 10px; padding: 4px 0; border-bottom: 1px solid var(--line); font-size: .78rem; }
 .diag-row small { color: var(--muted); } .diag-row .mono { text-align: right; overflow-wrap: anywhere; }
-/* iPhone home-screen app whose layout viewport ended up shorter than the screen (see lib/safeArea.ts): fixed things cannot be drawn into the
-   leftover strip at the bottom, so the menu takes the page colour (the strip below it then does not read as a separate block), loses its own
-   bottom padding and keeps its items near its bottom edge. */
-html.vp-short { --tabs-pad: 2px; }
-html.vp-short .tabs { background: var(--bg); }
-html.vp-short .tab { justify-content: flex-end; padding-bottom: 7px; }
+
+/* ---------- iPhone / iPad home-screen app shell ----------
+   iOS can open a home-screen app with a layout viewport ~62px shorter than the screen, and it fixes itself only after the first tap or a rotation.
+   position: fixed elements (the bottom menu) follow that shorter viewport and get clipped, so the menu jumped between two looks. In this mode (html.ios-app,
+   set in main.tsx) nothing is fixed to the viewport any more: #root is a full-height (100dvh) scroller, the header is sticky at its top and the menu is
+   sticky at its bottom, which is painted correctly whatever the viewport size. */
+html.ios-app, html.ios-app body { height: var(--app-h, 100dvh); min-height: 0; overflow: hidden; }
+html.ios-app #root {
+  position: absolute; top: 0; left: 0; right: 0; height: var(--app-h, 100dvh); z-index: 1;
+  display: flex; flex-direction: column; overflow-x: hidden; overflow-y: auto; overscroll-behavior: none; -webkit-overflow-scrolling: touch;
+}
+html.ios-app #root > * { flex-shrink: 0; }
+html.ios-app .page { flex: 1 0 auto; width: 100%; }
+html.ios-app .page.with-tabs { padding-bottom: 24px; }
+html.ios-app .tabs { position: sticky; bottom: 0; left: auto; right: auto; width: 100%; }
+html.ios-app .basket { position: sticky; left: auto; right: auto; bottom: calc(64px + var(--tabs-pad) + 1px); width: 100%; margin-top: -8px; }
+html.ios-app body.locked #root { overflow: hidden; }

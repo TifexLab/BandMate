@@ -245,10 +245,17 @@ Design for a phone in one hand first (320-430px), then scale up. Never assume a 
   Use it for every page-level container instead of a fixed pixel width.
 - Use `.flow` (CSS `column-width: 440px`) to put cards or groups side by side only when each column
   can be 440px wide. Phones and tablets in portrait stay one column; no extra breakpoints needed.
-- Tap targets at least 44px, bottom tab bar and sheets respect the safe areas through `--safe-top` / `--safe-bottom` (styles.css), never raw `env(safe-area-inset-*)`
-  for top/bottom: an iPhone/iPad app added to the home screen can report env() = 0 (header slid under the status bar, menu sat on the home-indicator line),
-  so `lib/safeArea.ts` probes it and, only then, sets the fallback `--sa-top` / `--sa-bottom` from the screen size; the larger of env() and the fallback wins.
-  iOS can also shrink the layout viewport of a home-screen app by the status-bar height after returning from the background (bottom-fixed menu then stops ~62px above the screen bottom; `/diag` shows `documentElement.clientHeight` 62 less than `innerHeight`); fixed elements are CLIPPED at that shorter height (shifting them down hides the menu labels, tried and reverted), so `safeArea.ts` detects it (`bottom:0` lands above the screen bottom), re-checks every second (iOS changes it without any event; a change is applied only after two equal readings), and sets `<html class="vp-short">`, which gives the menu the page colour (so the unreachable strip below it does not read as a separate block), drops its bottom padding and keeps its items near its bottom edge. NEVER try to make iOS re-lay the window out by toggling the viewport meta: that looped (the window shrank again after each "fix") and made header and menu strobe. `/diag` (link at the bottom of Settings) shows all these numbers for support. The bottom menu keeps at least 10px below it (`--tabs-pad`); tab labels shrink with the screen width and end in an ellipsis rather than overlap (7 tabs for admins).
+- Tap targets at least 44px. Top/bottom safe areas go through `--safe-top` / `--safe-bottom` (styles.css), never raw `env(safe-area-inset-*)` for top/bottom:
+  a home-screen iPhone/iPad app can report env() = 0, so `lib/safeArea.ts` probes it and, only then, sets a fallback `--sa-top` / `--sa-bottom` from the screen size
+  (the larger of the two wins). The bottom menu keeps at least 10px below it (`--tabs-pad`); tab labels shrink with the screen width and end in an ellipsis (7 tabs).
+- **iPhone/iPad home-screen app shell (`html.ios-app`, set in `safeArea.ts` before the first paint, styles.css "app shell")**: iOS can open such an app with a layout
+  viewport ~62px shorter than the screen (`documentElement.clientHeight` 812 vs 874) that fixes itself only after the first tap or a rotation; `position: fixed`
+  things (the menu) follow it and are CLIPPED there, so the menu used to jump between two looks. In this mode nothing is fixed to the viewport: `#root` is a
+  `--app-h` (= screen height) scroller, `.top` is sticky at its top, `.tabs` and `.basket` are sticky at its bottom; the window itself never scrolls (a scroll
+  guard puts it back). `/diag` (link at the bottom of Settings) shows the real numbers. DO NOT bring back position: fixed for the menu in this mode, do NOT try to
+  re-layout the window by toggling the viewport meta (it looped and made header and menu strobe), do NOT shift fixed elements down (clipped). Sheets/toasts are
+  still position: fixed (anchored to the shorter window in the short state: acceptable). Test with Playwright: iPhone UA + `navigator.standalone = true` + `screen`
+  874 high and a viewport of 812 and 874: the menu must have identical geometry in both.
 - Before shipping UI changes, check 320, 390, 820 (tablet), 1440 and 1920 wide, plus 844x390 landscape,
   and make sure `document.documentElement.scrollWidth <= innerWidth` (no sideways scroll).
   Run against emulators (`npm run emulators`, `VITE_USE_EMULATORS=true VITE_FIREBASE_PROJECT_ID=demo-bandmate`)
