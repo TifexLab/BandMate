@@ -1,7 +1,7 @@
 // Ticketed events. Payment happens in the band's own bank (QR / link), so BandMate cannot verify it: each time a fan opens a payment option
 // we issue a short code for the bank's "message for recipient"; at the door the band finds the payment with that code in its banking app,
 // then marks the code paid / used here. A code can be used once per day of the event. Expired codes are deleted.
-import { arrayRemove, arrayUnion, deleteField, doc, getDocs, increment, writeBatch, setDoc } from "firebase/firestore";
+import { arrayRemove, arrayUnion, deleteDoc, deleteField, doc, getDocs, increment, writeBatch, setDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { bandCol, bandDoc, getBase, getBandId } from "./scope";
 import type { Ticket, TicketCode } from "../types";
@@ -124,6 +124,17 @@ export async function cleanupEnded(tickets: Ticket[], today = todayLocal()) {
     }
     await setDoc(bandDoc("tickets", t.id), { cleaned: true }, { merge: true });
   }
+}
+
+/** Delete a ticket together with all its payment codes (the codes are a sub-collection, so they have to go first). Recorded sales stay. */
+export async function deleteTicket(ticketId: string) {
+  const snap = await getDocs(bandCol(`tickets/${ticketId}/codes`));
+  for (let i = 0; i < snap.docs.length; i += 400) {
+    const b = writeBatch(db);
+    snap.docs.slice(i, i + 400).forEach((d) => b.delete(d.ref));
+    await b.commit();
+  }
+  await deleteDoc(bandDoc("tickets", ticketId));
 }
 
 /** The mail a fan can send to themselves with the code. */

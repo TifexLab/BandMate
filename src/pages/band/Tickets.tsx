@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
-import { deleteDoc, doc, setDoc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 import { bandCol, bandDoc } from "../../lib/scope";
 import { useLiveQuery } from "../../lib/live";
 import { useBand } from "../../state/band";
@@ -9,7 +9,7 @@ import { useToast } from "../../state/toast";
 import { useTenant } from "../../state/tenant";
 import { errorText, money } from "../../lib/format";
 import { cleanPayUrl } from "../../lib/qrdecode";
-import { cleanupEnded, defaultPrefix, deleteCode, isEnded, markPaid, markUnpaid, markUsed, prefixOk, ticketLink, todayLocal, unmarkUsed } from "../../lib/tickets";
+import { cleanupEnded, defaultPrefix, deleteCode, deleteTicket, isEnded, markPaid, markUnpaid, markUsed, prefixOk, ticketLink, todayLocal, unmarkUsed } from "../../lib/tickets";
 import { useSwipeBack } from "../../lib/swipeBack";
 import { useT } from "../../i18n";
 import { useQr } from "../../components/brand";
@@ -23,6 +23,7 @@ export default function Tickets() {
   const t = useT();
   const { bandId } = useTenant();
   const { settings } = useSettings();
+  const toast = useToast();
   const list = useLiveQuery<Ticket>(() => bandCol("tickets"), `tickets-${bandId}`);
   const [edit, setEdit] = useState<Ticket | "new" | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
@@ -58,6 +59,9 @@ export default function Tickets() {
       <div className="stack-sm">
         {!done && <button className="btn primary block" onClick={() => setOpenId(x.id)}>{t("tk.open")}</button>}
         <button className="btn ghost block" onClick={() => setEdit(x)}>{t("tk.edit")}</button>
+        <ConfirmButton confirmText={t("tk.confirmDelete")} onConfirm={() => { deleteTicket(x.id).catch((e) => toast(errorText(e))); toast(t("tk.deleted")); }}>
+          {t("tk.delete")}
+        </ConfirmButton>
       </div>
     </article>
   );
@@ -249,7 +253,7 @@ function TicketSheet({ ticket, onClose, onDeleted }: { ticket: Ticket | null; on
         <Toggle id="tVisible" checked={visible} onChange={setVisible} label={t("tk.visible")} />
         <button className="btn primary block">{ticket ? t("tk.save") : t("tk.create")}</button>
         {ticket && (
-          <ConfirmButton confirmText={t("tk.confirmDelete")} onConfirm={() => { deleteDoc(bandDoc("tickets", ticket.id)).catch((x) => toast(errorText(x))); toast(t("tk.deleted")); onDeleted(); }}>
+          <ConfirmButton confirmText={t("tk.confirmDelete")} onConfirm={() => { deleteTicket(ticket.id).catch((x) => toast(errorText(x))); toast(t("tk.deleted")); onDeleted(); }}>
             {t("tk.delete")}
           </ConfirmButton>
         )}
