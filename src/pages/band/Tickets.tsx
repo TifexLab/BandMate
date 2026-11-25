@@ -63,8 +63,8 @@ export default function Tickets() {
       <div className="meta-row">
         <span className="note">{t("tk.sold", { n: x.paidCount || 0, max: x.max == null ? "∞" : x.max })}</span>
         {!x.visible && <span className="hidden-tag">{t("bundles.hiddenFromFans")}</span>}
+        {!done && <button type="button" className="mini primary push" onClick={() => setOpenId(x.id)}>{t("tk.openTicket")}</button>}
       </div>
-      {!done && <button className="btn primary block" onClick={() => setOpenId(x.id)}>{t("tk.open")}</button>}
     </article>
   );
 
@@ -104,7 +104,9 @@ function Detail({ ticket, onBack, onEdit, edit, setEdit }: { ticket: Ticket; onB
   const codes = useLiveQuery<TicketCode>(() => bandCol(`tickets/${ticket.id}/codes`), `tcodes-${bandId}-${ticket.id}`);
   const [q, setQ] = useState("");
   const [filter, setFilter] = useState<"all" | "unpaid" | "paid" | "today">("all");
-  useSwipeBack(onBack);
+  const [mode, setMode] = useState<null | "share" | "check">(null);
+  const goBack = () => (mode ? setMode(null) : onBack());
+  useSwipeBack(goBack);
   const link = ticketLink(ticket.id);
   const qr = useQr(link);
   const day = todayLocal();
@@ -130,7 +132,7 @@ function Detail({ ticket, onBack, onEdit, edit, setEdit }: { ticket: Ticket; onB
   return (
     <>
       <div className="toolbar">
-        <button className="btn ghost" onClick={onBack}>← {t("tk.back")}</button>
+        <button className="btn ghost" onClick={goBack}>← {t("tk.back")}</button>
         <button className="btn ghost" onClick={onEdit}>{t("tk.edit")}</button>
       </div>
       <section className="card">
@@ -138,7 +140,19 @@ function Detail({ ticket, onBack, onEdit, edit, setEdit }: { ticket: Ticket; onB
         <p className="note">{range(ticket)}{ticket.time ? ` · ${ticket.time}` : ""}{ticket.place ? ` · ${ticket.place}` : ""} · {money(ticket.price, cur)}</p>
         <p className="note">{t("tk.sold", { n: ticket.paidCount || 0, max: ticket.max == null ? "∞" : ticket.max })}</p>
       </section>
-      <section className="card">
+      {!mode && (
+        <div className="stack">
+          <button className="opt" onClick={() => setMode("share")}>
+            <b>{t("tk.optShare")}</b>
+            <span>{t("tk.optShareHint")}</span>
+          </button>
+          <button className="opt" onClick={() => setMode("check")}>
+            <b>{t("tk.optCheck")}</b>
+            <span>{t("tk.optCheckHint")}</span>
+          </button>
+        </div>
+      )}
+      {mode === "share" && <section className="card">
         <h2 className="card-h">{t("tk.share")}</h2>
         <p className="note">{t("tk.shareHint")}</p>
         <input readOnly value={link} onFocus={(e) => e.currentTarget.select()} aria-label={t("tk.link")} />
@@ -152,9 +166,12 @@ function Detail({ ticket, onBack, onEdit, edit, setEdit }: { ticket: Ticket; onB
             <a className="btn ghost block" href={qr} download={`${ticket.prefix}-qr.png`}>{t("tk.downloadQr")}</a>
           </div>
         )}
-      </section>
-      <section className="card">
-        <h2 className="card-h">{t("tk.codes")}</h2>
+      </section>}
+      {mode === "check" && <section className="card">
+        <h2 className="card-h">{t("tk.optCheck")}</h2>
+        <button className="btn ghost block" disabled>{t("tk.scanQr")} · {t("plan.soon")}</button>
+        <p className="hint">{t("tk.scanSoon")}</p>
+        <h3 className="card-h">{t("tk.codes")}</h3>
         <p className="note">{t("tk.codesHint")}</p>
         <div className="field"><input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("tk.search")} aria-label={t("tk.search")} autoComplete="off" /></div>
         <div className="field">
@@ -195,7 +212,7 @@ function Detail({ ticket, onBack, onEdit, edit, setEdit }: { ticket: Ticket; onB
             </div>
           );
         })}
-      </section>
+      </section>}
       {edit && edit !== "new" && <TicketSheet ticket={edit} onClose={() => setEdit(null)} onDeleted={() => { setEdit(null); onBack(); }} />}
     </>
   );

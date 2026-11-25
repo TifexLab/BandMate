@@ -576,3 +576,7 @@ html.ios-app body.locked #root { overflow: hidden; }
 .mini::after { content: ""; position: absolute; inset: -8px -3px; } /* finger-sized tap area around the small pill */
 .mini.danger { color: var(--out); border-color: color-mix(in srgb, var(--out) 45%, var(--line)); }
 .mini.danger.arm { background: var(--out); border-color: var(--out); color: #fff; }
+.mini.primary { background: var(--primary); border-color: var(--primary); color: var(--on-primary); }
+.meta-row .push { margin-left: auto; }
+.opt { display: grid; gap: 4px; text-align: left; width: 100%; padding: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); color: var(--text); font: inherit; cursor: pointer; }
+.opt b { font-size: 1.05rem; } .opt span { color: var(--muted); font-size: .88rem; }
