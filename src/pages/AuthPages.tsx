@@ -6,7 +6,8 @@ import { errorText } from "../lib/format";
 import { useAuth } from "../state/auth";
 import { useSettings } from "../state/settings";
 import { LogoBackdrop } from "../components/brand";
-import { platformAdminUrl } from "../lib/host";
+import { isPlatformHost, platformAdminUrl, platformUrl } from "../lib/host";
+import GoogleSignIn from "../components/GoogleSignIn";
 import { useTenant } from "../state/tenant";
 import { useT } from "../i18n";
 import LangSwitch from "../components/LangSwitch";
@@ -41,6 +42,7 @@ export function Login({ variant = "band" }: { variant?: "band" | "operator" | "c
   const nav = useNavigate();
   const after = variant === "operator" ? "/platform" : variant === "customer" ? "/start" : "/band";
   const { user, ready } = useAuth();
+  const { bandId } = useTenant();
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
   const [err, setErr] = useState("");
@@ -102,6 +104,15 @@ export function Login({ variant = "band" }: { variant?: "band" | "operator" | "c
       )}
       {variant === "band" && (
         <>
+          {/* Google's popup only works on bandmate.shop; on a band's own address we send the person there and bring them back to the band. */}
+          {isPlatformHost() ? (
+            <GoogleSignIn onError={setErr} />
+          ) : (
+            <>
+              <a className="btn ghost block" href={platformUrl(`/?next=${encodeURIComponent(`/b/${bandId}/band`)}`)}>{t("login.google")}</a>
+              <p className="hint center">{t("login.googleHint")}</p>
+            </>
+          )}
           <p className="note center">{t("login.inviteOnly")}</p>
           {/* Only here, on the login screen: never shown once someone is signed in. */}
           <p className="note center">

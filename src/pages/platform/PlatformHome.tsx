@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { GoogleAuthProvider, sendPasswordResetEmail, signInWithEmailAndPassword, signInWithPopup, signOut } from "firebase/auth";
 import { auth } from "../../firebase";
 import { Link } from "../../lib/nav";
@@ -28,15 +28,23 @@ const Card = ({ children }: { children: React.ReactNode }) => {
 };
 
 /** bandmate.shop: sign in with email + password, or start a new band. Kept deliberately simple. */
+/** Where to go after signing in, when a band's own address sent the person here for Google (`?next=/b/<band>/band`). Band paths only. */
+function nextPath(search: string) {
+  const n = new URLSearchParams(search).get("next") || "";
+  return /^\/b\/[a-z0-9-]+(\/[A-Za-z0-9\-_/]*)?$/.test(n) ? n : "";
+}
+
 export default function PlatformHome() {
   const { user, ready } = useAuth();
+  const next = nextPath(useLocation().search);
   if (!ready) return <main className="page"><div className="wrap"><Loading /></div></main>;
-  if (!user) return <LoginCard />;
+  if (!user) return <LoginCard fromBand={!!next} />;
   if (!user.emailVerified) return <VerifyEmail />;
+  if (next) return <Navigate to={next} replace />;
   return <MyBands user={user} />;
 }
 
-function LoginCard() {
+function LoginCard({ fromBand }: { fromBand?: boolean }) {
   const t = useT();
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
@@ -78,6 +86,7 @@ function LoginCard() {
   return (
     <Card>
       <p className="note">{t("home.tagline")}</p>
+      {fromBand && <p className="notice">{t("login.googleFromBand")}</p>}
       <form onSubmit={submit} className="stack">
         <div className="field">
           <label htmlFor="hEmail">{t("login.email")}</label>

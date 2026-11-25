@@ -37,7 +37,11 @@ email/password, Firestore, Storage), hosted on Vercel, code on GitHub. Setup ste
 - **Google sign-in** exists ONLY on the bandmate.shop home (`PlatformHome.tsx`, `signInWithPopup`). Firebase's authorized-domains list takes no
   wildcards, so `<band>.bandmate.shop` can't use the popup; after Google login the home sends a one-band person to `/b/<id>/band` as usual.
   Needs the Google provider enabled in Firebase Auth. Google emails are verified, so rules need no change. Not testable in the sandbox
-  (the popup loads apis.google.com); check it on the real site.
+  (the popup loads apis.google.com); check it on the real site. **On a band's own address** (`<band>.bandmate.shop` or its own domain) the band login page shows the same
+  button as a LINK to `https://bandmate.shop/?next=/b/<bandId>/band` (`AuthPages.tsx`); `PlatformHome` shows "sign in with Google here and we take you back to your band" and, once
+  signed in, navigates to `next` (only `/b/<id>...` paths are accepted). Sessions are per address, so a Google user ends up on bandmate.shop/b/<id>/band, not on the band's own
+  address (and an app added to the home screen from the band's own address would not be signed in): Google users should add bandmate.shop/b/<id> to the home screen. On
+  bandmate.shop/b/<id>/band/login the button is the real popup (`components/GoogleSignIn.tsx`).
 - Getting a band (self-service): bandmate.shop home "Start Your BandMate" button (`/start`,
   `src/pages/platform/StartPage.tsx`) is ONE form: your name, band name, address (= future `bandId`, checked live), plan
   (Free, or Pro shown as "coming soon"; "Compare plans" opens `PlanTable`), band email (this is the master login, the only
