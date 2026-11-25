@@ -216,7 +216,7 @@ IndexedDB, login and language stay), and `src/firebase.ts` sets `experimentalAut
 `--host-resolver-rules` and run Vite with `server.allowedHosts: true` (Vite rejects unknown hostnames).
 
 ## Help (in-app manual)
-`src/components/Help.tsx`, shown in Settings under the plan card: expandable topics (one open at a time, `.acc*` styles in `styles.css`).
+`src/components/Help.tsx`, shown in Settings under the plan card: expandable topics (one open at a time, `.acc*` styles in `styles.css`). Topics now: start, stock, qr, sell, bundles, tickets, sales, fan, look, people, plans, directory, install, account.
 Texts are `help.<id>.title/.lead/.b1…bN` in both `en.ts` and `sk.ts`. To add or change a topic edit `TOPICS` in the component (bullet count)
 and write the keys in both languages. Keep the manual in step with the app: when a feature changes, update its topic. Don't use `|` in
 help text (it means "plural forms" in the i18n files).
@@ -291,4 +291,5 @@ Planned in order: Stripe (the 2 €/month subscription and 2 €/month extra-spa
 webhook; then paid sign-ups create the band at once and `PAID_CHECKOUT_ENABLED` goes true; later Connect so sales payments go to each band;
 manual QR payments stay); more languages (the system is ready); automatic Vercel/Firebase setup for a band's own domain (needs Vercel token +
 Cloud Functions) and an email to the founder when approved; cleanup of unverified accounts; yearly price.
+Stripe for tickets (agreed design, not built): checkout collects the buyer's email; the webhook creates ONE code per ticket (qty 1, paid=true) and emails a PDF with one QR per ticket (server-side, e.g. pdf-lib + an email service); the existing scanner marks each used once per day. Open decisions: who receives the money (Stripe Connect to each band vs through BandMate), fees and refunds.
 Also: CSV export of sales, low-stock alerts, final terms text.

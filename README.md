@@ -2,9 +2,12 @@
 
 Merch inventory and payment-QR app for bands. One app serves many bands: each band has its own isolated store, team and settings, reached at its own address.
 
-- **Fan page** (`/`): no login. Products, prices and payment QR codes. Stock counts are never shown, only "Sold out". Optional top bar with social-media QR codes and an email address.
-- **Band desk** (`/band`): for approved BandMates. Sell with a basket and bundles, see stock, add pieces, upload QR pictures, track sales per gig, and set the band's colours, logo and top bar.
-- **People** (`/band/users`): Admin only. Approve sign-ups as BandMate, change roles, disable accounts.
+- **Fan page** (`/`): no login. Products, prices and payment QR codes / links. By default fans only see "Sold out"; a band can choose to show exact pieces left and/or a "Last pieces" hint (Settings). Optional top bar with social-media QR codes. A small "Concerts and tickets" button opens a separate screen with the band's events.
+- **Tickets** (`/listok/<id>`, `/listky`): a band creates an event ticket with a shareable link and QR. A fan who opens the payment (bank QR or link) gets a code for the bank message and a QR of that code. At the door staff search the code or scan the QR with the phone camera (in the app) and mark it used, once per day. Payment is made in the band's own bank and checked by hand; card payments (Stripe) come later.
+- **Band desk** (`/band`): for approved BandMates. Sell with a basket and bundles, see stock (with product photos), add pieces, upload QR pictures, sell and check tickets, track sales per gig, and set the band's colours, logo and top bar. An in-app Help (Settings) explains every part.
+- **People** (`/band/users`): Admin only. Invite and remove people, change roles.
+- **BandMate home** (`bandmate.shop`): sign in with email or Google, start a new band, and find a band by name (only bands that chose to be listed).
+- **Home-screen app**: add a band page to the iPhone (Safari, "Open as Web App") or install it on Android; it runs full screen. See "Layout" notes in `CLAUDE.md` for the iPhone window quirks.
 
 Built with React + Vite, Firebase Auth / Firestore / Storage, and hosted on Vercel.
 
@@ -19,10 +22,10 @@ Every band has its own space under its own short ID (for example `saw-dust-and-m
 
 | Role | Who | Can do |
 |---|---|---|
-| Fan | Anyone, not signed in | See visible products, prices, QR codes, top bar |
+| Fan | Anyone, not signed in | See visible products, prices, QR codes, top bar, events; open a ticket payment (gets a code) |
 | Pending | Signed up, not approved yet | Sees a "waiting for approval" screen only |
-| BandMate | Approved by the admin | Everything on the band desk: stock, adding pieces, QR uploads, bundles, sales, undo, colours, logo, top bar |
-| Admin | The band's first admin is created with `create-band` (below) | Everything a BandMate can do, plus inviting and removing people, changing roles and deleting sales |
+| BandMate | Approved by the admin | Everything on the band desk: stock, adding pieces, QR uploads, bundles, tickets and door check, sales, undo, colours, logo, top bar |
+| Admin | The band's first admin is created with `create-band` (below) | Everything a BandMate can do, plus inviting and removing people, changing roles, deleting sales, listing the band in the directory and deleting the band |
 | Disabled | Blocked by the admin | Nothing |
 
 These rules are enforced on Google's servers by `firestore.rules` and `storage.rules`, not only by hiding buttons. A fan who opens the browser console still can't read stock or sales.
@@ -131,5 +134,5 @@ The tests check that fans can't see stock, sales or hidden items, that nobody ca
 ## Notes
 
 - **Offline:** sales are saved on the phone straight away and sync when the signal comes back, so the desk works in basement clubs. Because of this, two phones selling the very last piece at the same moment can push stock below zero. The Stock tab then shows "−1 over" in red, so you can see it happened.
-- **Payments** are confirmed by hand ("Payment received · mark sold"). Stripe can be added later as another payment method in the checkout.
+- **Payments** are confirmed by hand ("Payment received · mark sold", and for tickets by checking the bank for the code). BandMate never sees the money. Stripe is planned: card payments, then per-buyer ticket QR codes emailed as a PDF (needs a server function, plan Blaze, an email service).
 - **Selling to other bands:** one deployment serves every band. Create each with `scripts/create-band.mjs`; the data of different bands is separated by the security rules (and tested in `tests/rules.test.mjs`).
