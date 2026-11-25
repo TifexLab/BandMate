@@ -4,7 +4,7 @@ import { test, before, after, beforeEach } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { initializeTestEnvironment, assertFails, assertSucceeds } from "@firebase/rules-unit-testing";
-import { doc, getDoc, setDoc, updateDoc, getDocs, collection, collectionGroup, query, where, deleteDoc, writeBatch, increment } from "firebase/firestore";
+import { addDoc, doc, getDoc, setDoc, updateDoc, getDocs, collection, collectionGroup, query, where, deleteDoc, writeBatch, increment } from "firebase/firestore";
 import { ref, uploadBytes, listAll } from "firebase/storage";
 
 let env;
@@ -555,4 +555,26 @@ test("tickets: fans read visible events and create unused payment codes only; st
   await assertFails(setDoc(doc(mate, "bands", "b", "tickets", "x"), { name: "X", visible: true }));
   await assertFails(getDocs(collection(mate, "bands", "b", "tickets", "gig", "codes")));
   await assertFails(deleteDoc(doc(mate, "bands", "b", "tickets", "gig")));
+});
+
+test("support messages: any verified account writes as itself; only the operator reads, changes or deletes", async () => {
+  const msg = (uid, email, over = {}) => ({ uid, email, name: "N", bandId: "a", bandName: "Band a", message: "Hello", createdAt: Date.now(), status: "new", ...over });
+  const a = as(ids.mateA, "u-mate-a@x.com");
+  await assertSucceeds(addDoc(collection(a, "supportMessages"), msg(ids.mateA, "u-mate-a@x.com")));
+  await assertFails(addDoc(collection(a, "supportMessages"), msg(ids.adminA, "u-mate-a@x.com"))); // not as someone else
+  await assertFails(addDoc(collection(a, "supportMessages"), msg(ids.mateA, "other@x.com"))); // not with another email
+  await assertFails(addDoc(collection(a, "supportMessages"), msg(ids.mateA, "u-mate-a@x.com", { message: "" })));
+  await assertFails(addDoc(collection(a, "supportMessages"), msg(ids.mateA, "u-mate-a@x.com", { message: "x".repeat(2001) })));
+  await assertFails(addDoc(collection(a, "supportMessages"), msg(ids.mateA, "u-mate-a@x.com", { status: "done" })));
+  await assertFails(addDoc(collection(a, "supportMessages"), { ...msg(ids.mateA, "u-mate-a@x.com"), extra: 1 }));
+  await assertFails(addDoc(collection(fan(), "supportMessages"), msg(ids.mateA, "u-mate-a@x.com"))); // signed in only
+  await assertFails(addDoc(collection(as(ids.stranger, "s@x.com", false), "supportMessages"), msg(ids.stranger, "s@x.com"))); // verified only
+  await assertFails(getDocs(collection(a, "supportMessages"))); // the sender cannot read them back
+  const op = as(ids.platform, "ops@bandmate.app");
+  const snap = await assertSucceeds(getDocs(collection(op, "supportMessages")));
+  assert.equal(snap.size, 1);
+  await assertSucceeds(updateDoc(doc(op, "supportMessages", snap.docs[0].id), { status: "done" }));
+  await assertFails(updateDoc(doc(a, "supportMessages", snap.docs[0].id), { status: "new" }));
+  await assertFails(deleteDoc(doc(a, "supportMessages", snap.docs[0].id)));
+  await assertSucceeds(deleteDoc(doc(op, "supportMessages", snap.docs[0].id)));
 });

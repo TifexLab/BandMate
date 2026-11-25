@@ -23,7 +23,7 @@ const TOPICS: { id: string; bullets: number; icon: ReactNode }[] = [
   { id: "plans", bullets: 4, icon: svg("M12 2l3 6.5 7 1-5 5 1.2 7L12 18l-6.2 3.5L7 14.500l-5-5 7-1z") },
   { id: "directory", bullets: 3, icon: svg("M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3") },
   { id: "install", bullets: 3, icon: svg("M7 2h10v20H7zM12 7v8M9 12l3 3 3-3") },
-  { id: "account", bullets: 5, icon: svg("M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0") },
+  { id: "account", bullets: 6, icon: svg("M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0") },
 ];
 
 /** Expandable manual: tap a topic to open how that part of the app works. One topic is open at a time. */

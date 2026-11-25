@@ -589,3 +589,4 @@ html.ios-app body.locked #root { overflow: hidden; }
 .res.bad { background: color-mix(in srgb, var(--out) 25%, var(--surface)); border: 2px solid var(--out); }
 .res-code { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; align-items: baseline; }
 .qr-tile.small { max-width: 190px; margin: 0 auto; }
+.field textarea { min-height: 110px; border-radius: 8px; border: 1.5px solid var(--line); background: var(--bg); color: inherit; font: inherit; padding: 10px 12px; width: 100%; min-width: 0; resize: vertical; }

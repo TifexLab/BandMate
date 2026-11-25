@@ -53,6 +53,21 @@ service cloud.firestore {
           && get(/databases/$(database)/documents/bands/$(bandId)/members/$(request.auth.uid)).data.role == 'admin');
     }
 
+    // Messages from a band's people to the BandMate admin (shown in the admin console). Any verified account may write one, only as themselves; only the operator reads.
+    match /supportMessages/{id} {
+      allow create: if verified()
+        && request.resource.data.keys().hasOnly(['uid', 'email', 'name', 'bandId', 'bandName', 'message', 'createdAt', 'status'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.message is string && request.resource.data.message.size() >= 1 && request.resource.data.message.size() <= 2000
+        && request.resource.data.name is string && request.resource.data.name.size() <= 80
+        && request.resource.data.bandId is string && request.resource.data.bandId.size() <= 60
+        && request.resource.data.bandName is string && request.resource.data.bandName.size() <= 80
+        && request.resource.data.status == 'new'
+        && request.resource.data.createdAt is number;
+      allow read, update, delete: if platformAdmin();
+    }
+
     // "Which bands am I in?": one collection-group query by the signed-in person's own email, which
     // only returns member documents carrying their own verified email. The BandMate operator may look up
     // anyone's, to see that a person asking for a new band already belongs to one.

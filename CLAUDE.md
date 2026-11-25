@@ -75,6 +75,14 @@ email/password, Firestore, Storage), hosted on Vercel, code on GitHub. Setup ste
   verification email is still sent, just without its "continue" button). `*.bandmate.shop` needs the wildcard
   domain added in Vercel (Vercel DNS).
 
+## Contact the BandMate admin
+- Settings has a "Contact the BandMate admin" card (`components/ContactAdminCard.tsx`, any signed-in band member): a message is stored in the top-level `supportMessages`
+  collection (`lib/support.ts`; rules: any VERIFIED account may create one only as itself, max 2000 chars, status "new"; only the operator reads/updates/deletes). The operator
+  sees them in `/platform` under "Messages from bands" (mark done / delete, mailto reply). The card also shows a plain mailto link to `SUPPORT_EMAIL` (`lib/support.ts`,
+  currently tifexlab@gmail.com: change it there). There is NO server and no push e-mail yet: the admin must open the console; real e-mail delivery needs a server (Cloud Functions /
+  the "Trigger Email" extension, Blaze plan), planned together with Stripe. The operator account itself is whatever e-mail was given to `scripts/create-platform-admin.mjs`
+  (`platformAdmins/{uid}`); the app does not store an admin e-mail anywhere else.
+
 ## Band directory (bandmate.shop home)
 - Signed-out visitors on the BandMate home see "Find a band" (`components/BandDirectory.tsx`): a search box (matches any part of the name,
   ignores case and accents, `fold()` in `lib/directory.ts`) and an A-Z list; a click opens `bandUrl(id)` (`<id>.bandmate.shop`).

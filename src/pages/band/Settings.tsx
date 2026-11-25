@@ -10,6 +10,7 @@ import { useTenant } from "../../state/tenant";
 import { ExtendButton, UsageCard } from "../../components/plans";
 import StockViewCard from "../../components/StockViewCard";
 import DirectoryCard from "../../components/DirectoryCard";
+import ContactAdminCard from "../../components/ContactAdminCard";
 import InstallCard from "../../components/InstallCard";
 import Help from "../../components/Help";
 import DeleteBandCard from "../../components/DeleteBandCard";
@@ -40,6 +41,7 @@ export default function SettingsPage() {
       <LookSection />
       <TopBarSection />
       <AccountSection />
+      <ContactAdminCard />
       <DeleteBandCard />
       <p className="note center"><Link to="/diag">{t("diag.link")}</Link></p>
     </div>

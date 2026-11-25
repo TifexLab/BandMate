@@ -7,6 +7,7 @@ import { PLATFORM_HOST } from "../../lib/host";
 import { activeBands, fetchMyBands, type MyBand } from "../../lib/memberships";
 import { addBandDomain, approveBandRequest, bandsCol, deleteBand, domainsCol, rejectBandRequest, requestsCol, setBandPlan, setBandStatus } from "../../lib/platform";
 import { limitsOf, mbText } from "../../lib/plans";
+import { deleteSupportMessage, setSupportDone, supportCol, type SupportMessage } from "../../lib/support";
 
 import { useLiveQuery } from "../../lib/live";
 import { errorText } from "../../lib/format";
@@ -28,6 +29,7 @@ export default function PlatformConsole() {
   const toast = useToast();
   const bands = useLiveQuery<BandRow>(() => (isPlatform ? bandsCol() : null), `platform-bands-${isPlatform}`);
   const domains = useLiveQuery<DomainRow>(() => (isPlatform ? domainsCol() : null), `platform-domains-${isPlatform}`);
+  const messages = useLiveQuery<SupportMessage>(() => (isPlatform ? supportCol() : null), `platform-support-${isPlatform}`);
   const requests = useLiveQuery<BandRequest>(() => (isPlatform ? query(requestsCol(), where("status", "==", "pending")) : null), `platform-requests-${isPlatform}`);
   const [newDomain, setNewDomain] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState("");
@@ -90,6 +92,21 @@ export default function PlatformConsole() {
               <div className="stack-sm">
                 <button className="btn primary" disabled={busy === r.id || (inBands[r.email] || []).length > 0} onClick={() => run(r.id, approveBandRequest(r), t("con.approved", { name: r.bandName }))}>{t("con.approve")}</button>
                 <button className="btn ghost" disabled={busy === r.id} onClick={() => run(r.id, rejectBandRequest(r.id), t("con.rejected"))}>{t("con.reject")}</button>
+              </div>
+            </section>
+          ))
+        )}
+
+        <h2 className="sec">{t("con.messages")} {messages.data.filter((m) => m.status === "new").length ? `(${messages.data.filter((m) => m.status === "new").length})` : ""}</h2>
+        {!messages.ready ? <Loading /> : messages.data.length === 0 ? <p className="note">{t("con.noMessages")}</p> : (
+          messages.data.slice().sort((a, b) => b.createdAt - a.createdAt).map((m) => (
+            <section className={`card ${m.status === "done" ? "dim" : ""}`} key={m.id}>
+              <h2 className="card-h">{m.bandName || m.bandId}</h2>
+              <p className="note">{m.name} · <a href={`mailto:${m.email}`}>{m.email}</a> · {new Date(m.createdAt).toLocaleString()}</p>
+              <p style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}>{m.message}</p>
+              <div className="stack-sm">
+                <button className="btn ghost" onClick={() => setSupportDone(m.id, m.status !== "done").catch((e) => toast(errorText(e)))}>{m.status === "done" ? t("con.msgReopen") : t("con.msgDone")}</button>
+                <button className="btn ghost" onClick={() => deleteSupportMessage(m.id).catch((e) => toast(errorText(e)))}>{t("con.msgDelete")}</button>
               </div>
             </section>
           ))
