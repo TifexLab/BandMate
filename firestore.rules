@@ -203,6 +203,11 @@ service cloud.firestore {
           || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['theme', 'preset', 'logoUrl', 'logoPath', 'logoOpacity', 'logoInHeader']));
         allow delete: if platformAdmin() || (isAdmin() && !existsAfter(bandRef())); // only together with the band
       }
+      // Card payments (Stripe Connect) status of this band: only the server writes it, staff can read it.
+      match /settings/payments {
+        allow read: if isStaff();
+        allow write: if false;
+      }
       // Current gig and other internal settings.
       match /settings/band {
         allow read, write: if isStaff();

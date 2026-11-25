@@ -199,3 +199,12 @@ export interface TicketCode {
   /** Days (yyyy-mm-dd) on which this code was used at the door; once per day. */
   usedDays: string[];
 }
+
+/** Card payments through Stripe Connect for one band (`settings/payments`). Written ONLY by the server (Stripe webhooks); staff may read it. */
+export interface PaymentsState {
+  stripeAccountId?: string;
+  chargesEnabled?: boolean;
+  payoutsEnabled?: boolean;
+  detailsSubmitted?: boolean;
+  updatedAt?: number;
+}

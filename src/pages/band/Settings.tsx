@@ -10,6 +10,7 @@ import { useTenant } from "../../state/tenant";
 import { ExtendButton, UsageCard } from "../../components/plans";
 import StockViewCard from "../../components/StockViewCard";
 import DirectoryCard from "../../components/DirectoryCard";
+import PaymentsCard from "../../components/PaymentsCard";
 import ContactAdminCard from "../../components/ContactAdminCard";
 import InstallCard from "../../components/InstallCard";
 import Help from "../../components/Help";
@@ -37,6 +38,7 @@ export default function SettingsPage() {
       <Help />
       <BandSection />
       <StockViewCard />
+      <PaymentsCard />
       <DirectoryCard />
       <LookSection />
       <TopBarSection />

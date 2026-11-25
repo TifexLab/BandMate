@@ -578,3 +578,16 @@ test("support messages: any verified account writes as itself; only the operator
   await assertFails(deleteDoc(doc(a, "supportMessages", snap.docs[0].id)));
   await assertSucceeds(deleteDoc(doc(op, "supportMessages", snap.docs[0].id)));
 });
+
+test("settings/payments: staff read it, nobody writes it from a browser (only the server does), fans and other bands see nothing", async () => {
+  await env.withSecurityRulesDisabled((ctx) => setDoc(doc(ctx.firestore(), "bands", "a", "settings", "payments"), { stripeAccountId: "acct_1", chargesEnabled: true, payoutsEnabled: true }));
+  const p = (db, b = "a") => doc(db, "bands", b, "settings", "payments");
+  await assertSucceeds(getDoc(p(as(ids.mateA))));
+  await assertSucceeds(getDoc(p(as(ids.adminA))));
+  await assertFails(getDoc(p(fan())));
+  await assertFails(getDoc(p(as(ids.mateB), "a"))); // another band's staff
+  for (const who of [ids.mateA, ids.adminA, ids.platform]) {
+    await assertFails(setDoc(p(as(who)), { chargesEnabled: true }));
+    await assertFails(updateDoc(p(as(who)), { stripeAccountId: "acct_evil" }));
+  }
+});
