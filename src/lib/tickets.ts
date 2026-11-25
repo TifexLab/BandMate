@@ -34,6 +34,23 @@ export const isSoldOut = (t: Pick<Ticket, "max" | "paidCount">) => t.max != null
 /** Where fans open this ticket (the link the band shares). */
 export const ticketLink = (ticketId: string) => `${window.location.origin}${getBase()}/listok/${ticketId}`;
 
+/** What a code's QR contains: the fan ticket page plus the code (a normal phone camera just opens that page; the staff scanner reads the code). */
+export const checkUrl = (ticketId: string, code: string) => `${ticketLink(ticketId)}?k=${encodeURIComponent(code)}`;
+
+/** Reads what a scanned QR (our link, or a bare code) says: which ticket and which code. */
+export function parseScan(text: string): { ticketId: string | null; code: string } | null {
+  const raw = text.trim();
+  if (!raw) return null;
+  try {
+    const u = new URL(raw);
+    const m = /\/listok\/([^/?#]+)/.exec(u.pathname);
+    const k = u.searchParams.get("k");
+    return m && k ? { ticketId: decodeURIComponent(m[1]), code: k.trim() } : null;
+  } catch {
+    return { ticketId: null, code: raw };
+  }
+}
+
 const savedKey = (ticketId: string) => `bandmate-ticket-${getBandId()}-${ticketId}`;
 export const savedCode = (ticketId: string, qty: number): string | null => {
   try {

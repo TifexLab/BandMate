@@ -91,7 +91,13 @@ email/password, Firestore, Storage), hosted on Vercel, code on GitHub. Setup ste
 - Fan link/QR = `<band address>/listok/<ticketId>` (`pages/TicketPage.tsx`). Opening a payment option (`issueCode`) creates `tickets/{id}/codes/{code lowercase}`
   `{code, qty, createdAt, paid:false, usedDays:[]}` and shows the code under the QR/link (`QrPopup` `code` prop) to write into the bank's message for the recipient,
   with copy, "send to my email" (mailto) and a screenshot tip. Same device + same quantity reuses the code (localStorage). Code = `prefix-` + 6 chars (no 0/O/1/I).
-- Staff screens: the ticket card has a small "Open ticket" pill that opens a menu with two options, "Share digitally" (link + QR) and "Check tickets" (the code list below; its "Scan QR code" button is a disabled placeholder until Stripe: the QR a card payer gets by email will be scanned there). Back/swipe goes check/share -> menu -> list.
+- Staff screens: the ticket card has a small "Open ticket" pill that opens a menu with two options, "Share digitally" (link + QR) and "Check tickets" (code search/list +
+  the QR scanner). Back/swipe goes check/share -> menu -> list.
+- **QR scanner** (`components/QrScanner.tsx`, camera via getUserMedia + `jsqr`, nothing uploaded; HTTPS needed): the QR of a code is `ticketLink(id)?k=<CODE>` (`checkUrl`,
+  `parseScan` in `lib/tickets.ts`; a plain phone camera just opens the fan page). The fan's payment sheet shows that QR under the code, so staff can scan instead of typing.
+  Result: code not found / other ticket (red), already used today (red, no let-in button), unpaid (yellow "check the bank", button "Paid, let in" = markPaid + used),
+  paid (green, "Let in"), after marking "Entry allowed". Works the same for Stripe later: the server will create the code doc as paid=true and email its QR (same URL format).
+  Tested with Chromium's fake camera (`--use-fake-device-for-media-stream --use-file-for-fake-video-capture=<y4m made with ffmpeg from a QR png>`).
 - BandMate can NOT verify the payment. At the door staff search the code, check the bank, tap "Used": `usedDays` gets today (once per day; a second try shows a
   warning) and, if not yet paid, `markPaid` records a Sale (method qr, line kind "ticket", no stock picks) and `paidCount += qty` in one batch. Mark paid / unpaid /
   delete code exist too. Fans may only CREATE a code doc (rules check shape, prefix, qty 1..20, unpaid, unused; refusing an existing id is the collision retry);

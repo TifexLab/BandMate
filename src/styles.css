@@ -580,3 +580,12 @@ html.ios-app body.locked #root { overflow: hidden; }
 .meta-row .push { margin-left: auto; }
 .opt { display: grid; gap: 4px; text-align: left; width: 100%; padding: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); color: var(--text); font: inherit; cursor: pointer; }
 .opt b { font-size: 1.05rem; } .opt span { color: var(--muted); font-size: .88rem; }
+.scanbox { display: grid; gap: 10px; }
+.scanbox video { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: var(--r); background: #000; }
+.scanres { display: grid; gap: 10px; }
+.res { padding: 14px; border-radius: var(--r); display: grid; gap: 4px; text-align: center; font-size: 1.05rem; }
+.res.ok { background: color-mix(in srgb, var(--ok, #3fb950) 25%, var(--surface)); border: 2px solid var(--ok, #3fb950); }
+.res.warn { background: color-mix(in srgb, #e3b341 22%, var(--surface)); border: 2px solid #e3b341; }
+.res.bad { background: color-mix(in srgb, var(--out) 25%, var(--surface)); border: 2px solid var(--out); }
+.res-code { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; align-items: baseline; }
+.qr-tile.small { max-width: 190px; margin: 0 auto; }

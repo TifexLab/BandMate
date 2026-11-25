@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "../lib/nav";
 import { useParams } from "react-router-dom";
 import { bandPath } from "../lib/scope";
 import { useLiveDoc } from "../lib/live";
 import { money } from "../lib/format";
-import { isEnded, isSoldOut, issueCode, mailtoCode } from "../lib/tickets";
+import QRCode from "qrcode";
+import { checkUrl, isEnded, isSoldOut, issueCode, mailtoCode } from "../lib/tickets";
 import { useSettings } from "../state/settings";
 import { useTenant } from "../state/tenant";
 import { useT } from "../i18n";
@@ -27,6 +28,11 @@ export default function TicketPage() {
   const [pay, setPay] = useState<{ code: string } | null>(null);
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
+  const [codeQr, setCodeQr] = useState("");
+  useEffect(() => {
+    if (!pay) return setCodeQr("");
+    QRCode.toDataURL(checkUrl(ticketId, pay.code), { margin: 1, width: 300, errorCorrectionLevel: "M", color: { dark: "#111111", light: "#ffffff" } }).then(setCodeQr).catch(() => setCodeQr(""));
+  }, [pay, ticketId]);
   const tk = live.data ? ({ ...live.data, id: ticketId } as Ticket) : null;
   const cur = settings.currency;
 
@@ -90,7 +96,7 @@ export default function TicketPage() {
           <footer className="foot"><Link to="/">{t("tk.toMerch")}</Link></footer>
         </div>
       </main>
-      {pay && tk && <QrPopup src={tk.qrUrl} title={tk.name} sub={`${qty}× · ${money(tk.price * qty, cur)}`} payUrl={tk.payUrl} cardPay={false} code={pay.code} codeMail={mail} onClose={() => setPay(null)} />}
+      {pay && tk && <QrPopup src={tk.qrUrl} title={tk.name} sub={`${qty}× · ${money(tk.price * qty, cur)}`} payUrl={tk.payUrl} cardPay={false} code={pay.code} codeMail={mail} codeQr={codeQr} onClose={() => setPay(null)} />}
     </>
   );
 }

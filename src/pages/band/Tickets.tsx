@@ -9,11 +9,12 @@ import { useToast } from "../../state/toast";
 import { useTenant } from "../../state/tenant";
 import { errorText, money } from "../../lib/format";
 import { cleanPayUrl } from "../../lib/qrdecode";
-import { cleanupEnded, defaultPrefix, deleteCode, deleteTicket, isEnded, markPaid, markUnpaid, markUsed, prefixOk, ticketLink, todayLocal, unmarkUsed } from "../../lib/tickets";
+import { cleanupEnded, defaultPrefix, deleteCode, deleteTicket, isEnded, markPaid, markUnpaid, markUsed, parseScan, prefixOk, ticketLink, todayLocal, unmarkUsed } from "../../lib/tickets";
 import { useSwipeBack } from "../../lib/swipeBack";
 import { useT } from "../../i18n";
 import { useQr } from "../../components/brand";
 import { ConfirmButton, PaySection, Sheet, Toggle } from "../../components/ui";
+import QrScanner from "../../components/QrScanner";
 import type { Ticket, TicketCode } from "../../types";
 
 const dmy = (s: string) => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s); return m ? `${Number(m[3])}.${Number(m[2])}.${m[1]}` : s; };
@@ -105,6 +106,7 @@ function Detail({ ticket, onBack, onEdit, edit, setEdit }: { ticket: Ticket; onB
   const [q, setQ] = useState("");
   const [filter, setFilter] = useState<"all" | "unpaid" | "paid" | "today">("all");
   const [mode, setMode] = useState<null | "share" | "check">(null);
+  const [scan, setScan] = useState<null | { text: string | null; marked: boolean }>(null); // text null = camera is on
   const goBack = () => (mode ? setMode(null) : onBack());
   useSwipeBack(goBack);
   const link = ticketLink(ticket.id);
@@ -169,8 +171,7 @@ function Detail({ ticket, onBack, onEdit, edit, setEdit }: { ticket: Ticket; onB
       </section>}
       {mode === "check" && <section className="card">
         <h2 className="card-h">{t("tk.optCheck")}</h2>
-        <button className="btn ghost block" disabled>{t("tk.scanQr")} · {t("plan.soon")}</button>
-        <p className="hint">{t("tk.scanSoon")}</p>
+        <button className="btn primary block" onClick={() => setScan({ text: null, marked: false })}>{t("tk.scanQr")}</button>
         <h3 className="card-h">{t("tk.codes")}</h3>
         <p className="note">{t("tk.codesHint")}</p>
         <div className="field"><input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("tk.search")} aria-label={t("tk.search")} autoComplete="off" /></div>
@@ -213,6 +214,43 @@ function Detail({ ticket, onBack, onEdit, edit, setEdit }: { ticket: Ticket; onB
           );
         })}
       </section>}
+      {scan && (
+        <Sheet title={t("tk.scanTitle")} onClose={() => setScan(null)}>
+          {scan.text === null ? (
+            <QrScanner onScan={(text) => setScan({ text, marked: false })} />
+          ) : (() => {
+            const p = parseScan(scan.text);
+            const found = p ? codes.data.find((c) => c.id === p.code.toLowerCase()) : undefined;
+            const other = !!p && !!p.ticketId && p.ticketId !== ticket.id;
+            const usedToday = !!found && (found.usedDays || []).includes(day);
+            return (
+              <div className="scanres">
+                {!p || other || !found ? (
+                  <div className="res bad"><b>{other ? t("tk.scanOther") : t("tk.scanNotFound")}</b>{p && !other && <span className="mono">{p.code}</span>}</div>
+                ) : (
+                  <>
+                    <div className="res-code"><b className="mono">{found.code}</b><span className="num">{found.qty}× · {money(ticket.price * found.qty, cur)}</span></div>
+                    {scan.marked && usedToday ? (
+                      <div className="res ok"><b>{t("tk.scanOk")}</b></div>
+                    ) : usedToday ? (
+                      <div className="res bad"><b>{t("tk.alreadyUsed")}</b></div>
+                    ) : (
+                      <>
+                        {found.paid ? <div className="res ok"><b>{t("tk.scanPaid")}</b></div> : <div className="res warn"><b>{t("tk.scanUnpaid")}</b></div>}
+                        <button className="btn primary block" onClick={() => markUsed(ticket, found, day, by, byName, band.gig).then(() => setScan({ text: scan.text, marked: true })).catch(fail)}>
+                          {found.paid ? t("tk.scanLetIn") : t("tk.scanPaidLetIn")}
+                        </button>
+                      </>
+                    )}
+                  </>
+                )}
+                <button className="btn ghost block" onClick={() => setScan({ text: null, marked: false })}>{t("tk.scanNext")}</button>
+                <button className="btn ghost block" onClick={() => setScan(null)}>{t("common.close")}</button>
+              </div>
+            );
+          })()}
+        </Sheet>
+      )}
       {edit && edit !== "new" && <TicketSheet ticket={edit} onClose={() => setEdit(null)} onDeleted={() => { setEdit(null); onBack(); }} />}
     </>
   );
