@@ -95,7 +95,7 @@ email/password, Firestore, Storage), hosted on Vercel, code on GitHub. Setup ste
   warning) and, if not yet paid, `markPaid` records a Sale (method qr, line kind "ticket", no stock picks) and `paidCount += qty` in one batch. Mark paid / unpaid /
   delete code exist too. Fans may only CREATE a code doc (rules check shape, prefix, qty 1..20, unpaid, unused; refusing an existing id is the collision retry);
   they can never read/list/change codes. Codes are deleted when an event is over (`cleanupEnded`, run when a band member opens Tickets, no server job; sales stay).
-  Every ticket card has a visible two-tap Delete (`deleteTicket`: its codes first, then the ticket; recorded sales stay). Deleting a band also deletes tickets and codes. Real per-buyer entry QR codes after a verified Stripe payment come later (needs Stripe + server).
+  Every ticket card has small Edit / Delete pills at the right under the price (`.tile-side`, `.mini`) and the Delete is a two-tap (`deleteTicket`: its codes first, then the ticket; recorded sales stay). Deleting a band also deletes tickets and codes. Real per-buyer entry QR codes after a verified Stripe payment come later (needs Stripe + server).
 
 ## Roles (source of truth: `firestore.rules`, `storage.rules`; tests in `tests/rules.test.mjs`)
 Roles live in `bands/{bandId}/members/{uid}.role`:

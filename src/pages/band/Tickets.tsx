@@ -50,19 +50,21 @@ export default function Tickets() {
           <h3>{x.name}</h3>
           <div className="sub">{range(x)}{x.time ? ` · ${x.time}` : ""}{x.place ? ` · ${x.place}` : ""}</div>
         </div>
-        <span className="tag">{money(x.price, settings.currency)}</span>
+        <div className="tile-side">
+          <span className="tag">{money(x.price, settings.currency)}</span>
+          <div className="mini-actions">
+            <button type="button" className="mini" onClick={() => setEdit(x)}>{t("tk.editShort")}</button>
+            <ConfirmButton className="mini danger" confirmText={t("tk.sure")} onConfirm={() => { deleteTicket(x.id).catch((e) => toast(errorText(e))); toast(t("tk.deleted")); }}>
+              {t("tk.deleteShort")}
+            </ConfirmButton>
+          </div>
+        </div>
       </div>
       <div className="meta-row">
         <span className="note">{t("tk.sold", { n: x.paidCount || 0, max: x.max == null ? "∞" : x.max })}</span>
         {!x.visible && <span className="hidden-tag">{t("bundles.hiddenFromFans")}</span>}
       </div>
-      <div className="stack-sm">
-        {!done && <button className="btn primary block" onClick={() => setOpenId(x.id)}>{t("tk.open")}</button>}
-        <button className="btn ghost block" onClick={() => setEdit(x)}>{t("tk.edit")}</button>
-        <ConfirmButton confirmText={t("tk.confirmDelete")} onConfirm={() => { deleteTicket(x.id).catch((e) => toast(errorText(e))); toast(t("tk.deleted")); }}>
-          {t("tk.delete")}
-        </ConfirmButton>
-      </div>
+      {!done && <button className="btn primary block" onClick={() => setOpenId(x.id)}>{t("tk.open")}</button>}
     </article>
   );
 

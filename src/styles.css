@@ -570,3 +570,9 @@ html.ios-app .page.with-tabs { padding-bottom: 24px; }
 html.ios-app .tabs { position: sticky; bottom: 0; left: auto; right: auto; width: 100%; }
 html.ios-app .basket { position: sticky; left: auto; right: auto; bottom: calc(64px + var(--tabs-pad) + 1px); width: 100%; margin-top: -8px; }
 html.ios-app body.locked #root { overflow: hidden; }
+.tile-side { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex: none; }
+.mini-actions { display: flex; gap: 6px; }
+.mini { position: relative; min-height: 28px; padding: 0 11px; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--text); font: inherit; font-size: .74rem; font-weight: 700; white-space: nowrap; }
+.mini::after { content: ""; position: absolute; inset: -8px -3px; } /* finger-sized tap area around the small pill */
+.mini.danger { color: var(--out); border-color: color-mix(in srgb, var(--out) 45%, var(--line)); }
+.mini.danger.arm { background: var(--out); border-color: var(--out); color: #fff; }
