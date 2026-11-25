@@ -87,6 +87,23 @@ email/password, Firestore, Storage), hosted on Vercel, code on GitHub. Setup ste
   the "Trigger Email" extension, Blaze plan), planned together with Stripe. The operator account itself is whatever e-mail was given to `scripts/create-platform-admin.mjs`
   (`platformAdmins/{uid}`); the app does not store an admin e-mail anywhere else.
 
+## Stripe (card payments for tickets) — built, switched OFF, not yet run against Stripe
+- Model: **Stripe Connect Express** destination charges. The fan pays on BandMate's Stripe; `application_fee_amount` (BandMate's fee, `platformFeeCents`: 3.5 % + 0.30 €, pay as
+  you go, no monthly fee; `src/lib/fees.ts` MIRRORS `functions/src/fees.ts`, a test compares them) is kept and the rest goes to the band's connected account, which Stripe pays out
+  to the band's IBAN (the band enters IBAN + identity in Stripe's own form; we never see it). Refund/chargeback risk lies with the platform (policy: refund until the event starts).
+- `functions/` (separate TypeScript project, Node 22, europe-west1; NOT built by Vercel): `createConnectLink` (callable, band admin: creates the Express account, stores
+  `bands/{id}/settings/payments`, returns Stripe's onboarding URL), `createTicketCheckout` (callable, public: validates ticket/qty/sold-out/currency EUR, builds the Checkout Session),
+  `stripeWebhook` (signature verified; `checkout.session.completed` -> `createPaidCodes` + PDF + e-mail, `account.updated` -> `settings/payments`). Secrets via
+  `firebase functions:secrets:set` (STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, RESEND_API_KEY) — NEVER in code or chat.
+- `createPaidCodes` (`functions/src/codes.ts`): ONE transaction creates one code per ticket (`qty 1, paid true`, same URL/QR format the door scanner reads), a Sale (method card) and
+  `paidCount += qty`; idempotent per Stripe session via `bands/{id}/ticketOrders/{sessionId}` (server-only, not readable by clients), `emailedAt` makes the e-mail idempotent too.
+  `ticketPdf.ts` builds the PDF (pdf-lib + embedded DejaVu fonts for Slovak letters, one page per ticket), `email.ts` sends through Resend.
+- Client: `lib/stripe.ts` (callables), `components/PaymentsCard.tsx` (Settings), ticket page "Pay by card" + `?paid=1` thank-you. All behind `CARD_CHECKOUT_ENABLED` (`lib/plans.ts`, false).
+  `settings/payments` is written ONLY by the server (rules: staff read, nobody writes).
+- Tests: `npm run test:functions` (Firestore emulator: codes/idempotency, PDF, e-mail, fee mirror), `npm run test:fees`. The Stripe API calls and the webhook wiring are NOT covered
+  (no keys were available): test in Stripe TEST mode following `STRIPE_SETUP.md` (Slovak step-by-step) before switching the flag on.
+- Not built yet: refunds via Stripe, card payments for merch, App Check / abuse protection on `createTicketCheckout`, e-mail alert for new admin messages, Stripe webhook for a second signing secret.
+
 ## Band directory (bandmate.shop home)
 - Signed-out visitors on the BandMate home see "Find a band" (`components/BandDirectory.tsx`): a search box (matches any part of the name,
   ignores case and accents, `fold()` in `lib/directory.ts`) and an A-Z list; a click opens `bandUrl(id)` (`<id>.bandmate.shop`).
@@ -303,5 +320,5 @@ Planned in order: Stripe (the 2 €/month subscription and 2 €/month extra-spa
 webhook; then paid sign-ups create the band at once and `PAID_CHECKOUT_ENABLED` goes true; later Connect so sales payments go to each band;
 manual QR payments stay); more languages (the system is ready); automatic Vercel/Firebase setup for a band's own domain (needs Vercel token +
 Cloud Functions) and an email to the founder when approved; cleanup of unverified accounts; yearly price.
-Stripe for tickets (agreed design, not built): checkout collects the buyer's email; the webhook creates ONE code per ticket (qty 1, paid=true) and emails a PDF with one QR per ticket (server-side, e.g. pdf-lib + an email service); the existing scanner marks each used once per day. Open decisions: who receives the money (Stripe Connect to each band vs through BandMate), fees and refunds.
+Stripe for tickets: BUILT (see the Stripe section above, switched off). Original design: checkout collects the buyer's email; the webhook creates ONE code per ticket (qty 1, paid=true) and emails a PDF with one QR per ticket (server-side, e.g. pdf-lib + an email service); the existing scanner marks each used once per day. Open decisions: who receives the money (Stripe Connect to each band vs through BandMate), fees and refunds.
 Also: CSV export of sales, low-stock alerts, final terms text.

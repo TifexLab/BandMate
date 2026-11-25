@@ -121,6 +121,10 @@ Free: 1 person, 100 items, 50 MB of pictures. Pro (2 € a month): 3 people, 200
 
 To let people be invited, turn on **Authentication → Sign-in method → Email/Password → Email link (passwordless sign-in)** in Firebase.
 
+## Card payments (Stripe) — built, switched off
+
+Server code lives in `functions/` (Firebase Functions). Setup, secrets and the test procedure are in `STRIPE_SETUP.md`. Pay as you go: BandMate keeps 3.5 % + 0.30 € per card payment, bands get the rest paid out by Stripe. Tests: `npm run test:functions` and `npm run test:fees`.
+
 ## Testing the security rules
 
 You need Java 11 or newer installed. The emulators run on your computer:

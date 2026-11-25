@@ -1,4 +1,9 @@
+import { useState } from "react";
 import { bandPath } from "../lib/scope";
+import { startConnectOnboarding } from "../lib/stripe";
+import { useAuth } from "../state/auth";
+import { useToast } from "../state/toast";
+import { errorText } from "../lib/format";
 import { useLiveDoc } from "../lib/live";
 import { PLATFORM_FEE_FIXED_CENTS, PLATFORM_FEE_PERCENT, bandReceivesCents, platformFeeCents } from "../lib/fees";
 import { CARD_CHECKOUT_ENABLED } from "../lib/plans";
@@ -13,6 +18,9 @@ export default function PaymentsCard() {
   const t = useT();
   const { bandId } = useTenant();
   const { settings } = useSettings();
+  const { profile } = useAuth();
+  const toast = useToast();
+  const [busy, setBusy] = useState(false);
   const doc = useLiveDoc<PaymentsState>(() => bandPath("settings/payments"), `payments-${bandId}`);
   const p = doc.data;
   const cur = settings.currency;
@@ -34,9 +42,13 @@ export default function PaymentsCard() {
         <li>{t("sp.how5")}</li>
       </ul>
       {state !== "active" && (
-        <button className="btn primary block" disabled={!CARD_CHECKOUT_ENABLED}>
-          {t("sp.enable")}{!CARD_CHECKOUT_ENABLED && <span className="soon"> · {t("plan.soon")}</span>}
+        <>
+        <button className="btn primary block" disabled={!CARD_CHECKOUT_ENABLED || busy || profile?.role !== "admin"}
+          onClick={() => { setBusy(true); startConnectOnboarding(bandId).then((url) => { window.location.href = url; }).catch((e) => { toast(errorText(e)); setBusy(false); }); }}>
+          {state === "pending" ? t("sp.continue") : t("sp.enable")}{!CARD_CHECKOUT_ENABLED && <span className="soon"> · {t("plan.soon")}</span>}
         </button>
+        {CARD_CHECKOUT_ENABLED && profile?.role !== "admin" && <p className="hint">{t("sp.adminOnly")}</p>}
+        </>
       )}
     </section>
   );

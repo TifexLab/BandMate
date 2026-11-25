@@ -5,6 +5,8 @@ import { bandPath } from "../lib/scope";
 import { useLiveDoc } from "../lib/live";
 import { money } from "../lib/format";
 import QRCode from "qrcode";
+import { CARD_CHECKOUT_ENABLED } from "../lib/plans";
+import { startTicketCheckout } from "../lib/stripe";
 import { checkUrl, isEnded, isSoldOut, issueCode, mailtoCode } from "../lib/tickets";
 import { useSettings } from "../state/settings";
 import { useTenant } from "../state/tenant";
@@ -29,6 +31,7 @@ export default function TicketPage() {
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
   const [codeQr, setCodeQr] = useState("");
+  const paidBack = new URLSearchParams(window.location.search).get("paid") === "1";
   useEffect(() => {
     if (!pay) return setCodeQr("");
     QRCode.toDataURL(checkUrl(ticketId, pay.code), { margin: 1, width: 300, errorCorrectionLevel: "M", color: { dark: "#111111", light: "#ffffff" } }).then(setCodeQr).catch(() => setCodeQr(""));
@@ -77,6 +80,7 @@ export default function TicketPage() {
               <p className="note">{tk.endDate && tk.endDate !== tk.startDate ? `${dmy(tk.startDate)} – ${dmy(tk.endDate)}` : dmy(tk.startDate)}{tk.time ? ` · ${tk.time}` : ""}</p>
               {tk.place && <p className="note">{tk.place}</p>}
               <p className="tag big">{money(tk.price, cur)}</p>
+              {paidBack && <p className="notice">{t("tk.paidThanks")}</p>}
               {ended ? <p className="notice">{t("tk.eventEnded")}</p> : soldOut ? <p className="notice">{t("tk.soldOut")}</p> : !hasPay ? <p className="notice">{t("tk.payAtDoor")}</p> : (
                 <div className="stack">
                   <div className="field">
@@ -88,7 +92,12 @@ export default function TicketPage() {
                   </div>
                   {err && <p className="hint err">{err}</p>}
                   {(tk.qrUrl || tk.payUrl) && <button className="btn primary block" disabled={busy} onClick={open}>{tk.qrUrl && tk.payUrl ? t("tk.payBoth") : tk.qrUrl ? t("tk.payQr") : t("tk.payLink")}</button>}
-                  {tk.cardPay && <button className="btn ghost block" disabled>{t("qr.card")} · {t("plan.soon")}</button>}
+                  {tk.cardPay && (
+                    <button className="btn ghost block" disabled={!CARD_CHECKOUT_ENABLED || busy}
+                      onClick={() => { setBusy(true); setErr(""); startTicketCheckout(bandId, ticketId, qty, t("tk.lang")).then((url) => { window.location.href = url; }).catch(() => { setErr(t("tk.cardFailed")); setBusy(false); }); }}>
+                      {t("qr.card")}{!CARD_CHECKOUT_ENABLED && <> · {t("plan.soon")}</>}
+                    </button>
+                  )}
                 </div>
               )}
             </section>

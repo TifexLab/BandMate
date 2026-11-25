@@ -13,6 +13,7 @@
     "create-platform-admin": "node scripts/create-platform-admin.mjs",
     "migrate": "node scripts/migrate-to-multitenant.mjs",
     "test:i18n": "node --experimental-strip-types --test tests/i18n.test.mjs",
+    "test:functions": "cd functions && npm run build && cd .. && firebase emulators:exec --only firestore --project demo-bandmate \"cd functions && node --experimental-strip-types --test test/server.test.mjs\"",
     "test:fees": "node --experimental-strip-types --test tests/fees.test.mjs"
   },
   "dependencies": {
