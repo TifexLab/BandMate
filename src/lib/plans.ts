@@ -23,7 +23,7 @@ export const PAID_CHECKOUT_ENABLED = false;
 
 /** Card payment in the shop (needs Stripe, not built yet). While false, the product window shows the card option greyed out
  *  with "Coming soon". */
-export const CARD_CHECKOUT_ENABLED = false;
+export const CARD_CHECKOUT_ENABLED = true;
 
 export interface Limits {
   plan: Plan;
