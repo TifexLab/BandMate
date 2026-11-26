@@ -88,10 +88,15 @@ export const createTicketCheckout = onCall({ region: REGION, secrets: [STRIPE_SE
 
 /** Stripe tells us about payments and about the band's payout-account status. The signature is verified, nothing else is trusted. */
 export const stripeWebhook = onRequest({ region: REGION, secrets: [STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, RESEND_API_KEY] }, async (req, res) => {
-  let event: Stripe.Event;
-  try {
-    event = stripeClient().webhooks.constructEvent(req.rawBody, String(req.headers["stripe-signature"] || ""), STRIPE_WEBHOOK_SECRET.value());
-  } catch {
+  // The secret may hold several signing secrets separated by commas (one per Stripe endpoint: "Your account" and "Connected accounts").
+  let event: Stripe.Event | null = null;
+  for (const secret of STRIPE_WEBHOOK_SECRET.value().split(",").map((x) => x.trim()).filter(Boolean)) {
+    try {
+      event = stripeClient().webhooks.constructEvent(req.rawBody, String(req.headers["stripe-signature"] || ""), secret);
+      break;
+    } catch { /* try the next secret */ }
+  }
+  if (!event) {
     res.status(400).send("bad signature");
     return;
   }
