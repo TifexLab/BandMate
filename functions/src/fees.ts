@@ -1,8 +1,11 @@
-// BandMate's fee for a card payment (pay as you go). MIRROR of src/lib/fees.ts — change BOTH. Amounts are in cents.
-export const PLATFORM_FEE_PERCENT = 3.5;
-export const PLATFORM_FEE_FIXED_CENTS = 30;
+// Fees for card payments: the BUYER pays them, the band receives the full ticket price. MIRROR of src/lib/fees.ts (see the comment there) — change BOTH. Amounts are in cents.
+export const BANDMATE_FEE_CENTS = 150; // per order
+export const STRIPE_PERCENT = 1.5;
+export const STRIPE_FIXED_CENTS = 25;
 
-export function platformFeeCents(amountCents: number): number {
-  if (!Number.isFinite(amountCents) || amountCents <= 0) return 0;
-  return Math.min(amountCents, Math.round((amountCents * PLATFORM_FEE_PERCENT) / 100) + PLATFORM_FEE_FIXED_CENTS);
+export function totalChargeCents(baseCents: number): number {
+  if (!Number.isFinite(baseCents) || baseCents <= 0) return 0;
+  return Math.ceil((baseCents + BANDMATE_FEE_CENTS + STRIPE_FIXED_CENTS) / (1 - STRIPE_PERCENT / 100));
 }
+
+export const serviceFeeCents = (baseCents: number) => Math.max(0, totalChargeCents(baseCents) - baseCents);

@@ -9,7 +9,7 @@ import { initializeApp } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
 import Stripe from "stripe";
 import { createPaidCodes } from "./codes";
-import { platformFeeCents } from "./fees";
+import { serviceFeeCents } from "./fees";
 import { buildTicketsPdf } from "./ticketPdf";
 import { sendMail, ticketMail } from "./email";
 
@@ -68,13 +68,16 @@ export const createTicketCheckout = onCall({ region: REGION, secrets: [STRIPE_SE
   if ((pub.data()?.currency ?? "€") !== "€") throw new HttpsError("failed-precondition", "Only EUR is supported for now.");
   const unit = Math.round(t.price * 100);
   if (unit < 50) throw new HttpsError("failed-precondition", "Price too low for a card payment.");
-  const total = unit * qty, fee = platformFeeCents(total), lang = asLang(req.data?.lang);
+  const total = unit * qty, fee = serviceFeeCents(total), lang = asLang(req.data?.lang);
   const ret = `${siteBase(bandId)}/listok/${ticketId}`;
   const metadata = { bandId, ticketId, qty: String(qty), lang };
   const session = await stripeClient().checkout.sessions.create({
     mode: "payment",
     locale: lang,
-    line_items: [{ quantity: qty, price_data: { currency: "eur", unit_amount: unit, product_data: { name: t.name } } }],
+    line_items: [
+      { quantity: qty, price_data: { currency: "eur", unit_amount: unit, product_data: { name: t.name } } },
+      { quantity: 1, price_data: { currency: "eur", unit_amount: fee, product_data: { name: lang === "sk" ? "Servisný poplatok" : "Service fee" } } },
+    ],
     payment_intent_data: { application_fee_amount: fee, transfer_data: { destination: acct.stripeAccountId }, metadata },
     metadata,
     success_url: `${ret}?paid=1`,

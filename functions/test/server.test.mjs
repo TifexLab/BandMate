@@ -6,14 +6,14 @@ import { PDFDocument } from "pdf-lib";
 import { createPaidCodes, checkUrl } from "../lib/codes.js";
 import { buildTicketsPdf } from "../lib/ticketPdf.js";
 import { sendMail, ticketMail } from "../lib/email.js";
-import { platformFeeCents as serverFee } from "../lib/fees.js";
-import { platformFeeCents as clientFee } from "../../src/lib/fees.ts";
+import { totalChargeCents as serverFee, serviceFeeCents as serverSvc } from "../lib/fees.js";
+import { totalChargeCents as clientFee, serviceFeeCents as clientSvc } from "../../src/lib/fees.ts";
 
 let db;
 before(() => { initializeApp({ projectId: "demo-bandmate" }); db = getFirestore(); });
 
 test("the server and the app calculate the BandMate fee identically", () => {
-  for (const c of [0, 1, 20, 49, 50, 99, 100, 333, 1000, 1234, 2500, 9999, 100000]) assert.equal(serverFee(c), clientFee(c), `amount ${c}`);
+  for (const c of [0, 1, 20, 49, 50, 99, 100, 333, 1000, 1234, 2500, 9999, 100000]) { assert.equal(serverFee(c), clientFee(c), `amount ${c}`); assert.equal(serverSvc(c), clientSvc(c), `fee ${c}`); }
 });
 
 test("a paid order creates one paid code per ticket, records the sale and counts the tickets, once", async () => {

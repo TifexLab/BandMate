@@ -37,6 +37,6 @@ Potom pridaj adresu `stripeWebhook` do Stripe (krok 2.2).
 Až po úspešnom teste: v Stripe prepni na Live, vytvor živý webhook (rovnako ako v kroku 2), nastav tajné kľúče znova na `sk_live_…`/živý `whsec_…` a nasaď.
 
 ## Poznámky
-- Poplatok BandMate (3,5 % + 0,30 €) je v `src/lib/fees.ts` a `functions/src/fees.ts` (musia byť rovnaké; test to kontroluje).
+- Servisný poplatok pre kupujúceho (1,50 € za objednávku + poplatok Stripe ≈ 1,5 % + 0,25 €; kapela dostane celú cenu) je v `src/lib/fees.ts` a `functions/src/fees.ts` (musia byť rovnaké; test to kontroluje).
 - Ak by dva webhooky mali rôzne `whsec_`, treba funkcii povedať, že môže overiť oba (zatiaľ sa počíta s jedným). Najjednoduchšie je nastaviť jeden endpoint a v Stripe zapnúť „Listen to events on Connected accounts".
 - Ešte nepostavené: vrátenie peňazí cez Stripe, platby kartou za merch, ochrana pred zneužitím (App Check), upozornenie na novú správu pre admina e-mailom.

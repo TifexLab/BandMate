@@ -5,7 +5,7 @@ import { useAuth } from "../state/auth";
 import { useToast } from "../state/toast";
 import { errorText } from "../lib/format";
 import { useLiveDoc } from "../lib/live";
-import { PLATFORM_FEE_FIXED_CENTS, PLATFORM_FEE_PERCENT, bandReceivesCents, platformFeeCents } from "../lib/fees";
+import { BANDMATE_FEE_CENTS, bandReceivesCents, serviceFeeCents, totalChargeCents } from "../lib/fees";
 import { CARD_CHECKOUT_ENABLED } from "../lib/plans";
 import { money } from "../lib/format";
 import { useSettings } from "../state/settings";
@@ -26,8 +26,7 @@ export default function PaymentsCard() {
   const cur = settings.currency;
   const state = p?.chargesEnabled && p?.payoutsEnabled ? "active" : p?.stripeAccountId ? "pending" : "off";
   const example = 1000;
-  const pct = String(PLATFORM_FEE_PERCENT).replace(".", ",");
-  const fixed = money(PLATFORM_FEE_FIXED_CENTS / 100, cur);
+  const bm = money(BANDMATE_FEE_CENTS / 100, cur);
 
   return (
     <section className="card">
@@ -36,8 +35,8 @@ export default function PaymentsCard() {
       <p><b>{t(`sp.state.${state}` as "sp.state.off")}</b></p>
       <ul className="plainlist">
         <li>{t("sp.how1")}</li>
-        <li>{t("sp.how2", { pct, fixed })}</li>
-        <li>{t("sp.how3", { price: money(example / 100, cur), fee: money(platformFeeCents(example) / 100, cur), net: money(bandReceivesCents(example) / 100, cur) })}</li>
+        <li>{t("sp.how2", { fee: bm })}</li>
+        <li>{t("sp.how3", { price: money(example / 100, cur), total: money(totalChargeCents(example) / 100, cur), fee: money(serviceFeeCents(example) / 100, cur), net: money(bandReceivesCents(example) / 100, cur) })}</li>
         <li>{t("sp.how4")}</li>
         <li>{t("sp.how5")}</li>
       </ul>

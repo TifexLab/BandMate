@@ -1,13 +1,20 @@
-// What BandMate charges bands for card payments handled through Stripe (pay as you go: a percentage plus a fixed amount per payment, no monthly fee).
-// Mirrored in functions/src/fees.ts (the server is a separate project) — change BOTH. Amounts are in cents.
-export const PLATFORM_FEE_PERCENT = 3.5;
-export const PLATFORM_FEE_FIXED_CENTS = 30;
+// Card payments through Stripe: the BUYER pays the fees, the band receives the full ticket price (pay as you go, no monthly fee).
+//   total charged = ticket price x qty + service fee
+//   service fee   = BandMate's operating fee (1.50 EUR per order) + what Stripe will take from the total (about 1.5 % + 0.25 EUR, EU cards)
+// The total is "grossed up" so that after Stripe's cut BandMate keeps its 1.50 EUR. Stripe's real fee depends on the card (non-EU cards cost more); BandMate carries that difference.
+// Mirrored in functions/src/fees.ts (the server is a separate project) — change BOTH; a test compares them. Amounts are in cents.
+export const BANDMATE_FEE_CENTS = 150; // per order
+export const STRIPE_PERCENT = 1.5;
+export const STRIPE_FIXED_CENTS = 25;
 
-/** BandMate's fee for a payment of `amountCents`, rounded to the nearest cent. Never more than the payment itself. */
-export function platformFeeCents(amountCents: number): number {
-  if (!Number.isFinite(amountCents) || amountCents <= 0) return 0;
-  return Math.min(amountCents, Math.round((amountCents * PLATFORM_FEE_PERCENT) / 100) + PLATFORM_FEE_FIXED_CENTS);
+/** What the buyer is charged for a ticket amount of `baseCents` (rounded UP to the cent). 0 for nonsense. */
+export function totalChargeCents(baseCents: number): number {
+  if (!Number.isFinite(baseCents) || baseCents <= 0) return 0;
+  return Math.ceil((baseCents + BANDMATE_FEE_CENTS + STRIPE_FIXED_CENTS) / (1 - STRIPE_PERCENT / 100));
 }
 
-/** What the band receives from a payment (before Stripe's own payout costs, which BandMate covers out of its fee). */
-export const bandReceivesCents = (amountCents: number) => Math.max(0, amountCents - platformFeeCents(amountCents));
+/** The service fee line the buyer sees (BandMate's fee plus Stripe's cut). */
+export const serviceFeeCents = (baseCents: number) => Math.max(0, totalChargeCents(baseCents) - baseCents);
+
+/** What the band receives: the full ticket price. */
+export const bandReceivesCents = (baseCents: number) => (Number.isFinite(baseCents) && baseCents > 0 ? Math.round(baseCents) : 0);

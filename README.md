@@ -123,7 +123,7 @@ To let people be invited, turn on **Authentication → Sign-in method → Email/
 
 ## Card payments (Stripe) — built, switched off
 
-Server code lives in `functions/` (Firebase Functions). Setup, secrets and the test procedure are in `STRIPE_SETUP.md`. Pay as you go: BandMate keeps 3.5 % + 0.30 € per card payment, bands get the rest paid out by Stripe. Tests: `npm run test:functions` and `npm run test:fees`.
+Server code lives in `functions/` (Firebase Functions). Setup, secrets and the test procedure are in `STRIPE_SETUP.md`. Pay as you go: The buyer pays a service fee on top of the ticket price (1.50 € per order for BandMate + Stripe's card fee); the band receives the full ticket price, paid out by Stripe. Tests: `npm run test:functions` and `npm run test:fees`.
 
 ## Testing the security rules
 

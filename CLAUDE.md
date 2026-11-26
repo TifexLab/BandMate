@@ -88,7 +88,7 @@ email/password, Firestore, Storage), hosted on Vercel, code on GitHub. Setup ste
   (`platformAdmins/{uid}`); the app does not store an admin e-mail anywhere else.
 
 ## Stripe (card payments for tickets) — built, switched OFF, not yet run against Stripe
-- Model: **Stripe Connect Express** destination charges. The fan pays on BandMate's Stripe; `application_fee_amount` (BandMate's fee, `platformFeeCents`: 3.5 % + 0.30 €, pay as
+- Model: **Stripe Connect Express** destination charges. The fan pays on BandMate's Stripe; `application_fee_amount` (= the service fee the BUYER pays on top of the ticket price, `serviceFeeCents`: 1.50 € per order + Stripe's ~1.5 % + 0.25 € grossed up; the band gets the FULL ticket price; Checkout shows it as a second line item; pay as
   you go, no monthly fee; `src/lib/fees.ts` MIRRORS `functions/src/fees.ts`, a test compares them) is kept and the rest goes to the band's connected account, which Stripe pays out
   to the band's IBAN (the band enters IBAN + identity in Stripe's own form; we never see it). Refund/chargeback risk lies with the platform (policy: refund until the event starts).
 - `functions/` (separate TypeScript project, Node 22, europe-west1; NOT built by Vercel): `createConnectLink` (callable, band admin: creates the Express account, stores

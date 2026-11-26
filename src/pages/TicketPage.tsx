@@ -7,6 +7,7 @@ import { money } from "../lib/format";
 import QRCode from "qrcode";
 import { CARD_CHECKOUT_ENABLED } from "../lib/plans";
 import { startTicketCheckout } from "../lib/stripe";
+import { serviceFeeCents, totalChargeCents } from "../lib/fees";
 import { checkUrl, isEnded, isSoldOut, issueCode, mailtoCode } from "../lib/tickets";
 import { useSettings } from "../state/settings";
 import { useTenant } from "../state/tenant";
@@ -92,6 +93,7 @@ export default function TicketPage() {
                   </div>
                   {err && <p className="hint err">{err}</p>}
                   {(tk.qrUrl || tk.payUrl) && <button className="btn primary block" disabled={busy} onClick={open}>{tk.qrUrl && tk.payUrl ? t("tk.payBoth") : tk.qrUrl ? t("tk.payQr") : t("tk.payLink")}</button>}
+                  {tk.cardPay && CARD_CHECKOUT_ENABLED && <p className="hint">{t("tk.cardTotal", { total: money(totalChargeCents(Math.round(tk.price * 100) * qty) / 100, cur), fee: money(serviceFeeCents(Math.round(tk.price * 100) * qty) / 100, cur) })}</p>}
                   {tk.cardPay && (
                     <button className="btn ghost block" disabled={!CARD_CHECKOUT_ENABLED || busy}
                       onClick={() => { setBusy(true); setErr(""); startTicketCheckout(bandId, ticketId, qty, t("tk.lang")).then((url) => { window.location.href = url; }).catch(() => { setErr(t("tk.cardFailed")); setBusy(false); }); }}>

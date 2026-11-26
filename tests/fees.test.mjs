@@ -1,17 +1,25 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { platformFeeCents, bandReceivesCents } from "../src/lib/fees.ts";
+import { totalChargeCents, serviceFeeCents, bandReceivesCents, BANDMATE_FEE_CENTS, STRIPE_PERCENT, STRIPE_FIXED_CENTS } from "../src/lib/fees.ts";
 
-test("platform fee = 3.5% + 0.30 EUR, rounded to the cent", () => {
-  assert.equal(platformFeeCents(1000), 65); // 10.00 -> 0.35 + 0.30
-  assert.equal(platformFeeCents(2500), 118); // 25.00 -> 0.875 -> 0.88 + 0.30
-  assert.equal(platformFeeCents(100), 34); // 1.00 -> 0.035 -> 0.04 + 0.30 (rounds .5 up)
-  assert.equal(bandReceivesCents(1000), 935);
+const stripeCut = (total) => Math.round((total * STRIPE_PERCENT) / 100) + STRIPE_FIXED_CENTS;
+
+test("the buyer pays price + service fee; the band gets the full price", () => {
+  assert.equal(totalChargeCents(1000), 1193); // 10.00 -> 11.93, service fee 1.93
+  assert.equal(serviceFeeCents(1000), 193);
+  assert.equal(totalChargeCents(2000), 2209); // 2 x 10 in one order
+  assert.equal(bandReceivesCents(1000), 1000);
 });
-test("fee never exceeds the payment and ignores nonsense", () => {
-  assert.equal(platformFeeCents(20), 20); // tiny payment: the whole amount, never more
-  assert.equal(platformFeeCents(0), 0);
-  assert.equal(platformFeeCents(-5), 0);
-  assert.equal(platformFeeCents(NaN), 0);
-  assert.equal(bandReceivesCents(20), 0);
+
+test("after Stripe's cut BandMate keeps its 1.50 EUR (within a cent of rounding), at every price", () => {
+  for (const base of [50, 100, 500, 990, 1000, 1234, 2500, 4999, 10000, 25000, 100000]) {
+    const total = totalChargeCents(base);
+    const bandmateNet = serviceFeeCents(base) - stripeCut(total);
+    assert.ok(Math.abs(bandmateNet - BANDMATE_FEE_CENTS) <= 2, `base ${base}: BandMate keeps ${bandmateNet} cents`);
+    assert.ok(total >= base + BANDMATE_FEE_CENTS, "never charges less than price + 1.50");
+  }
+});
+
+test("nonsense amounts charge nothing", () => {
+  for (const bad of [0, -5, NaN, Infinity]) { assert.equal(totalChargeCents(bad), 0); assert.equal(bandReceivesCents(bad), 0); }
 });
